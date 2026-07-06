@@ -1,0 +1,23 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "checkin_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "checkin_id",
+    "user_id",
+    "text"
+  ]
+}

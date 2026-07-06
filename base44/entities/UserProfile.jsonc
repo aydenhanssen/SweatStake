@@ -1,0 +1,93 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "fitness_level": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    "primary_goal": {
+      "type": "string",
+      "enum": [
+        "lose_weight",
+        "build_muscle",
+        "stay_consistent"
+      ]
+    },
+    "points_balance": {
+      "type": "number",
+      "default": 500
+    },
+    "total_points_won": {
+      "type": "number",
+      "default": 0
+    },
+    "total_workouts": {
+      "type": "number",
+      "default": 0
+    },
+    "challenges_won": {
+      "type": "number",
+      "default": 0
+    },
+    "challenges_lost": {
+      "type": "number",
+      "default": 0
+    },
+    "current_streak": {
+      "type": "number",
+      "default": 0
+    },
+    "longest_streak": {
+      "type": "number",
+      "default": 0
+    },
+    "is_premium": {
+      "type": "boolean",
+      "default": false
+    },
+    "reminder_time": {
+      "type": "string",
+      "default": "08:00"
+    },
+    "privacy_public": {
+      "type": "boolean",
+      "default": true
+    },
+    "following": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "onboarding_complete": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "user_id",
+    "username"
+  ]
+}

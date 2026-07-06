@@ -1,0 +1,63 @@
+{
+  "name": "CheckIn",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "challenge_id": {
+      "type": "string"
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "workout_type": {
+      "type": "string",
+      "enum": [
+        "push",
+        "pull",
+        "legs",
+        "cardio",
+        "full_body"
+      ]
+    },
+    "note": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "flag_count": {
+      "type": "number",
+      "default": 0
+    },
+    "flagged_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "liked_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "user_id",
+    "challenge_id",
+    "photo_url",
+    "workout_type"
+  ]
+}

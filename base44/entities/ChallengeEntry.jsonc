@@ -1,0 +1,57 @@
+{
+  "name": "ChallengeEntry",
+  "type": "object",
+  "properties": {
+    "challenge_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "bronze",
+        "silver",
+        "gold",
+        "elite"
+      ]
+    },
+    "stake_amount": {
+      "type": "number"
+    },
+    "checkins_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "checkins_required": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "won",
+        "lost"
+      ],
+      "default": "active"
+    },
+    "points_won": {
+      "type": "number",
+      "default": 0
+    },
+    "points_lost": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "challenge_id",
+    "user_id",
+    "stake_amount",
+    "checkins_required"
+  ]
+}

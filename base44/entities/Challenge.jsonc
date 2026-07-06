@@ -1,0 +1,49 @@
+{
+  "name": "Challenge",
+  "type": "object",
+  "properties": {
+    "tier": {
+      "type": "string",
+      "enum": [
+        "bronze",
+        "silver",
+        "gold",
+        "elite"
+      ]
+    },
+    "week_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "week_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "active",
+        "completed"
+      ],
+      "default": "upcoming"
+    },
+    "total_pot": {
+      "type": "number",
+      "default": 0
+    },
+    "participant_count": {
+      "type": "number",
+      "default": 0
+    },
+    "platform_fee_collected": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "tier",
+    "week_start",
+    "week_end"
+  ]
+}
