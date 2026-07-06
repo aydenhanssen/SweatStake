@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { TIERS } from '@/lib/constants';
 import TierBadge from '@/components/shared/TierBadge';
 import StatCard from '@/components/shared/StatCard';
-import { Flame, Trophy, Coins, Dumbbell, Clock, Zap, ChevronRight, Plus, Bell } from 'lucide-react';
+import { Flame, Trophy, Coins, Dumbbell, Clock, Zap, ChevronRight, Plus, Bell, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -166,12 +166,19 @@ export default function Home() {
         >
           <Dumbbell className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <h3 className="font-bold text-foreground mb-1">No Active Challenge</h3>
-          <p className="text-sm text-muted-foreground mb-4">Join a challenge and put your points on the line</p>
-          <Link to="/challenges">
-            <Button className="font-bold rounded-2xl">
-              <Plus className="w-4 h-4 mr-1" /> Join a Challenge
-            </Button>
-          </Link>
+          <p className="text-sm text-muted-foreground mb-4">Create or join a challenge and put your points on the line</p>
+          <div className="flex flex-col gap-2">
+            <Link to="/create-challenge">
+              <Button className="w-full font-bold rounded-2xl">
+                <Plus className="w-4 h-4 mr-1" /> Create a Challenge
+              </Button>
+            </Link>
+            <Link to="/challenges">
+              <Button variant="outline" className="w-full font-bold rounded-2xl">
+                <Users className="w-4 h-4 mr-1" /> Join a Challenge
+              </Button>
+            </Link>
+          </div>
         </motion.div>
       )}
 
