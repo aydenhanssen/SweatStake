@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
 import StatCard from '@/components/shared/StatCard';
 import TierBadge from '@/components/shared/TierBadge';
-import { Settings, Dumbbell, Trophy, Coins, Flame, Target, Award, ChevronRight } from 'lucide-react';
+import { Settings, Dumbbell, Trophy, Coins, Flame, Target, Award, ChevronRight, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -72,13 +72,18 @@ export default function Profile() {
       </div>
 
       {/* Points Balance */}
-      <div className="bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 rounded-3xl p-5 mb-6 flex items-center justify-between">
-        <div>
-          <p className="text-xs text-primary/70 font-semibold uppercase tracking-wider">Points Balance</p>
-          <p className="text-3xl font-black text-primary">{profile.points_balance?.toLocaleString()}</p>
+      <Link to="/wallet" className="block mb-6">
+        <div className="bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 rounded-3xl p-5 flex items-center justify-between transition-all hover:border-primary/40">
+          <div>
+            <p className="text-xs text-primary/70 font-semibold uppercase tracking-wider">Points Balance</p>
+            <p className="text-3xl font-black text-primary">{profile.points_balance?.toLocaleString()}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Wallet className="w-5 h-5 text-primary/60" />
+            <ChevronRight className="w-5 h-5 text-primary/40" />
+          </div>
         </div>
-        <Coins className="w-8 h-8 text-primary/40" />
-      </div>
+      </Link>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3 mb-6">

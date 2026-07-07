@@ -23,6 +23,7 @@ import Settings from '@/pages/Settings';
 import Notifications from '@/pages/Notifications';
 import Challenges from '@/pages/Challenges';
 import CreateChallenge from '@/pages/CreateChallenge';
+import Wallet from '@/pages/Wallet';
 import Results from '@/pages/Results';
 import Onboarding from '@/pages/Onboarding';
 
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/challenges" element={<Challenges />} />
         <Route path="/create-challenge" element={<CreateChallenge />} />
+        <Route path="/wallet" element={<Wallet />} />
         <Route path="/results" element={<Results />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -1,0 +1,36 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "stake",
+        "win",
+        "loss",
+        "daily_bonus",
+        "purchase",
+        "refund",
+        "signup_bonus"
+      ]
+    },
+    "amount": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "balance_after": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "user_id",
+    "type",
+    "amount",
+    "description"
+  ]
+}
