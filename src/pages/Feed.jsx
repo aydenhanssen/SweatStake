@@ -138,8 +138,12 @@ export default function Feed() {
             >
               {/* Header */}
               <div className="p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-muted-foreground">
-                  {checkin.username?.charAt(0).toUpperCase()}
+                <div className="w-9 h-9 rounded-full bg-secondary overflow-hidden flex items-center justify-center text-xs font-bold text-muted-foreground">
+                  {checkin.user_photo_url ? (
+                    <img src={checkin.user_photo_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    checkin.username?.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-sm text-foreground">{checkin.username}</p>

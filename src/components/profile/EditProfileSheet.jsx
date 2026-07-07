@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 export default function EditProfileSheet({ open, onOpenChange, profile, onSaved }) {
   const [username, setUsername] = useState(profile?.username || '');
   const [photoUrl, setPhotoUrl] = useState(profile?.photo_url || '');
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
@@ -23,17 +24,24 @@ export default function EditProfileSheet({ open, onOpenChange, profile, onSaved 
   const handlePhoto = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setPhotoUrl(file_url);
     } catch {
-      toast({ title: 'Upload failed', variant: 'destructive' });
+      toast({ title: 'Upload failed', description: 'Could not upload photo. Please try again.', variant: 'destructive' });
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleSave = async () => {
     if (!username.trim()) {
       toast({ title: 'Username required', variant: 'destructive' });
+      return;
+    }
+    if (uploading) {
+      toast({ title: 'Photo still uploading...', description: 'Please wait for the upload to finish.' });
       return;
     }
     setSaving(true);
@@ -64,7 +72,9 @@ export default function EditProfileSheet({ open, onOpenChange, profile, onSaved 
           <div className="flex flex-col items-center gap-2">
             <div className="relative">
               <div className="w-24 h-24 rounded-full bg-secondary border-2 border-primary/20 overflow-hidden flex items-center justify-center">
-                {photoUrl ? (
+                {uploading ? (
+                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                ) : photoUrl ? (
                   <img src={photoUrl} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-3xl font-black text-muted-foreground">
@@ -72,12 +82,12 @@ export default function EditProfileSheet({ open, onOpenChange, profile, onSaved 
                   </span>
                 )}
               </div>
-              <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer shadow-lg">
+              <label className={`absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer shadow-lg ${uploading ? 'pointer-events-none opacity-50' : ''}`}>
                 <Camera className="w-4 h-4" />
-                <input type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
+                <input type="file" accept="image/*" className="hidden" onChange={handlePhoto} disabled={uploading} />
               </label>
             </div>
-            <p className="text-xs text-muted-foreground">Tap to change photo</p>
+            <p className="text-xs text-muted-foreground">{uploading ? 'Uploading...' : 'Tap to change photo'}</p>
           </div>
 
           {/* Username */}
@@ -91,7 +101,7 @@ export default function EditProfileSheet({ open, onOpenChange, profile, onSaved 
             />
           </div>
 
-          <Button onClick={handleSave} disabled={saving} className="w-full font-bold rounded-2xl h-12">
+          <Button onClick={handleSave} disabled={saving || uploading} className="w-full font-bold rounded-2xl h-12">
             {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</> : 'Save Changes'}
           </Button>
         </div>

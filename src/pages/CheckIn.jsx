@@ -123,6 +123,7 @@ export default function CheckInPage() {
       await base44.entities.CheckIn.create({
         user_id: profile.user_id,
         username: profile.username,
+        user_photo_url: profile.photo_url || '',
         challenge_id: activeEntry.challenge_id,
         photo_url: file_url,
         workout_type: workoutType,

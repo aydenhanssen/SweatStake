@@ -8,6 +8,9 @@
     "username": {
       "type": "string"
     },
+    "user_photo_url": {
+      "type": "string"
+    },
     "challenge_id": {
       "type": "string"
     },
