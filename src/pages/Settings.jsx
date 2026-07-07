@@ -5,15 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, User, Bell, Shield, Crown, HelpCircle, LogOut } from 'lucide-react';
+import { ArrowLeft, User, Bell, Shield, Crown, HelpCircle, LogOut, Pencil } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import EditProfileSheet from '@/components/profile/EditProfileSheet';
 
 export default function Settings() {
   const { profile, refetch } = useProfile();
   const [reminderTime, setReminderTime] = useState(profile?.reminder_time || '08:00');
   const [privacyPublic, setPrivacyPublic] = useState(profile?.privacy_public ?? true);
   const [saving, setSaving] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -44,9 +46,23 @@ export default function Settings() {
       icon: User,
       content: (
         <div className="space-y-3">
-          <div>
-            <Label className="text-xs text-muted-foreground uppercase tracking-wider">Username</Label>
-            <p className="text-foreground font-semibold">{profile?.username}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-secondary border border-border overflow-hidden flex items-center justify-center">
+                {profile?.photo_url ? (
+                  <img src={profile.photo_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-5 h-5 text-muted-foreground" />
+                )}
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Username</Label>
+                <p className="text-foreground font-semibold">{profile?.username}</p>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" className="font-bold rounded-xl" onClick={() => setEditOpen(true)}>
+              <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+            </Button>
           </div>
           <div>
             <Label className="text-xs text-muted-foreground uppercase tracking-wider">Fitness Level</Label>
@@ -140,6 +156,13 @@ export default function Settings() {
         <LogOut className="w-4 h-4" />
         Log Out
       </button>
+
+      <EditProfileSheet
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        profile={profile}
+        onSaved={refetch}
+      />
     </div>
   );
 }
