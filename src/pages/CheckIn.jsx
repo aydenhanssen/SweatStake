@@ -1,13 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
 import { WORKOUT_TYPES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Camera, Check, RotateCcw, ArrowUp, ArrowDown, Heart, Dumbbell, Footprints } from 'lucide-react';
+import { Check, RotateCcw, ArrowUp, ArrowDown, Heart, Dumbbell, Footprints, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import VerificationCamera from '@/components/checkin/VerificationCamera';
+import { generateChallengeCode, burnWatermark } from '@/components/checkin/burnWatermark';
 
 const workoutIcons = {
   push: ArrowUp,
@@ -17,56 +19,20 @@ const workoutIcons = {
   full_body: Dumbbell,
 };
 
-function burnWatermark(dataUrl) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-
-      const now = new Date();
-      const watermark = `${now.toLocaleDateString()}  ·  ${now.toLocaleTimeString()}`;
-
-      const fontSize = Math.max(14, Math.round(img.width * 0.035));
-      ctx.font = `bold ${fontSize}px ui-monospace, monospace`;
-      const padding = fontSize * 0.6;
-      const textMetrics = ctx.measureText(watermark);
-      const boxHeight = fontSize + padding * 2;
-      const boxWidth = textMetrics.width + padding * 2;
-
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(padding, img.height - boxHeight - padding, boxWidth, boxHeight);
-
-      ctx.fillStyle = '#FFD700';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(watermark, padding * 2, img.height - boxHeight / 2 - padding);
-
-      canvas.toBlob((blob) => {
-        const file = new File([blob], `checkin-${Date.now()}.jpg`, { type: 'image/jpeg' });
-        resolve({ file, url: URL.createObjectURL(blob) });
-      }, 'image/jpeg', 0.92);
-    };
-    img.onerror = () => resolve(null);
-    img.src = dataUrl;
-  });
-}
-
 export default function CheckInPage() {
   const { profile, refetch } = useProfile();
-  const [step, setStep] = useState('capture');
+  const [step, setStep] = useState('camera');
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [captureTimestamp, setCaptureTimestamp] = useState(null);
+  const [challengeCode, setChallengeCode] = useState(null);
+  const [location, setLocation] = useState(null);
   const [workoutType, setWorkoutType] = useState('');
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [activeEntry, setActiveEntry] = useState(null);
   const [updatedEntry, setUpdatedEntry] = useState(null);
   const [entryLoaded, setEntryLoaded] = useState(false);
-  const [retaking, setRetaking] = useState(false);
-  const fileRef = useRef(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -86,44 +52,43 @@ export default function CheckInPage() {
   }, [profile]);
 
   useEffect(() => {
-    if (entryLoaded && activeEntry && step === 'capture' && fileRef.current && !retaking) {
-      fileRef.current.click();
-    }
-  }, [entryLoaded, activeEntry, step, retaking]);
+    setChallengeCode(generateChallengeCode());
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setLocation(null),
+      { timeout: 5000, enableHighAccuracy: true }
+    );
+  }, []);
 
-  const handleCapture = async (e) => {
-    const file = e.target.files[0];
-    if (!file) {
-      setRetaking(false);
+  const handleCameraCapture = async (rawDataUrl) => {
+    const result = await burnWatermark(rawDataUrl, challengeCode, location);
+    if (!result) {
+      toast({ title: 'Error', description: 'Could not process photo. Try again.', variant: 'destructive' });
       return;
     }
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const result = await burnWatermark(ev.target.result);
-      if (!result) {
-        toast({ title: 'Error', description: 'Could not process photo. Try again.', variant: 'destructive' });
-        setRetaking(false);
-        return;
-      }
-      setPhotoFile(result.file);
-      setPhotoPreview(result.url);
-      setStep('details');
-      setRetaking(false);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
+    setPhotoFile(result.file);
+    setPhotoPreview(result.url);
+    setCaptureTimestamp(result.timestamp);
+    setStep('preview');
   };
 
   const handleRetake = () => {
     setPhotoFile(null);
     setPhotoPreview(null);
-    setStep('capture');
-    setRetaking(true);
-    setTimeout(() => fileRef.current?.click(), 100);
+    setCaptureTimestamp(null);
+    setChallengeCode(generateChallengeCode());
+    setStep('camera');
   };
 
   const handleSubmit = async () => {
     if (!workoutType || !photoFile || !activeEntry) return;
+    const captureAge = Date.now() - new Date(captureTimestamp).getTime();
+    if (captureAge > 5 * 60 * 1000) {
+      toast({ title: 'Photo expired', description: 'Please retake your check-in photo.', variant: 'destructive' });
+      handleRetake();
+      return;
+    }
     setSubmitting(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file: photoFile });
@@ -135,7 +100,9 @@ export default function CheckInPage() {
         photo_url: file_url,
         workout_type: workoutType,
         note,
-        timestamp: new Date().toISOString(),
+        timestamp: captureTimestamp,
+        location: location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : '',
+        challenge_code: challengeCode,
       });
       const updated = await base44.entities.ChallengeEntry.update(activeEntry.id, {
         checkins_completed: activeEntry.checkins_completed + 1,
@@ -172,52 +139,32 @@ export default function CheckInPage() {
     <div className="max-w-lg mx-auto px-4 pt-6 pb-4 min-h-screen flex flex-col">
       <h1 className="text-xl font-black mb-6">Check In</h1>
 
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleCapture}
-      />
-
       <AnimatePresence mode="wait">
-        {step === 'capture' && (
-          <motion.div
-            key="capture"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col items-center justify-center gap-6"
-          >
-            {!activeEntry ? (
-              <div className="text-center">
-                <p className="text-muted-foreground mb-4">Join a challenge first to check in</p>
-                <Button onClick={() => navigate('/challenges')} className="font-bold rounded-2xl">
-                  Browse Challenges
-                </Button>
-              </div>
-            ) : (
-              <>
-                <motion.button
-                  onClick={() => fileRef.current?.click()}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-36 h-36 rounded-full bg-primary/10 border-4 border-primary/30 flex items-center justify-center transition-all hover:bg-primary/20 hover:border-primary/50"
-                >
-                  <Camera className="w-14 h-14 text-primary" />
-                </motion.button>
-                <div className="text-center">
-                  <p className="font-bold text-foreground">Opening Camera...</p>
-                  <p className="text-sm text-muted-foreground">Tap if your camera doesn't open automatically</p>
-                </div>
-              </>
-            )}
-          </motion.div>
+        {step === 'camera' && (
+          activeEntry ? (
+            <VerificationCamera
+              challengeCode={challengeCode}
+              onCapture={handleCameraCapture}
+              onClose={() => navigate('/')}
+            />
+          ) : (
+            <motion.div
+              key="no-entry"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex-1 flex flex-col items-center justify-center gap-4 text-center"
+            >
+              <p className="text-muted-foreground">Join a challenge first to check in</p>
+              <Button onClick={() => navigate('/challenges')} className="font-bold rounded-2xl">
+                Browse Challenges
+              </Button>
+            </motion.div>
+          )
         )}
 
-        {step === 'details' && (
+        {step === 'preview' && (
           <motion.div
-            key="details"
+            key="preview"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
@@ -227,10 +174,18 @@ export default function CheckInPage() {
               <img src={photoPreview} alt="Workout proof" className="w-full h-full object-cover" />
               <button
                 onClick={handleRetake}
-                className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur rounded-full"
+                className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur rounded-full flex items-center gap-1.5"
               >
                 <RotateCcw className="w-4 h-4 text-white" />
+                <span className="text-white text-xs font-bold">Retake</span>
               </button>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>{location ? 'Location captured' : 'Location unavailable'}</span>
+              <span className="mx-1">·</span>
+              <span className="font-mono">CODE: {challengeCode}</span>
             </div>
 
             <div>
@@ -291,13 +246,7 @@ export default function CheckInPage() {
               className="relative w-28 h-28 flex items-center justify-center"
             >
               <div className="absolute inset-0 rounded-full bg-primary/10 border-2 border-primary/40" />
-              <motion.div
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.5, delay: 0.4, ease: 'easeOut' }}
-              >
-                <Check className="w-14 h-14 text-primary" strokeWidth={3} />
-              </motion.div>
+              <Check className="w-14 h-14 text-primary" strokeWidth={3} />
               <motion.div
                 initial={{ scale: 0, opacity: 0.8 }}
                 animate={{ scale: 2.5, opacity: 0 }}
