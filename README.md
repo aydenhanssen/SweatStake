@@ -65,5 +65,3 @@ npm install
 
 # 3. Run locally with Base44
 base44 dev
-
-Update README.md with professional project description
