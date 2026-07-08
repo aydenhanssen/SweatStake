@@ -57,10 +57,7 @@ export default function CreateChallenge() {
     try {
       const now = new Date();
       const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay());
-      weekStart.setHours(0, 0, 0, 0);
-
-      const weekEnd = new Date(weekStart);
+      const weekEnd = new Date(now);
       weekEnd.setDate(weekEnd.getDate() + dur.weeks * 7);
 
       const challenge = await base44.entities.Challenge.create({
