@@ -45,15 +45,17 @@ function burnWatermark(dataUrl) {
       ctx.fillText(watermark, padding * 2, img.height - boxHeight / 2 - padding);
 
       canvas.toBlob((blob) => {
-        resolve({ blob, url: URL.createObjectURL(blob) });
+        const file = new File([blob], `checkin-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        resolve({ file, url: URL.createObjectURL(blob) });
       }, 'image/jpeg', 0.92);
     };
+    img.onerror = () => resolve(null);
     img.src = dataUrl;
   });
 }
 
 export default function CheckInPage() {
-  const { profile } = useProfile();
+  const { profile, refetch } = useProfile();
   const [step, setStep] = useState('capture');
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -97,9 +99,14 @@ export default function CheckInPage() {
     }
     const reader = new FileReader();
     reader.onload = async (ev) => {
-      const { blob, url } = await burnWatermark(ev.target.result);
-      setPhotoFile(blob);
-      setPhotoPreview(url);
+      const result = await burnWatermark(ev.target.result);
+      if (!result) {
+        toast({ title: 'Error', description: 'Could not process photo. Try again.', variant: 'destructive' });
+        setRetaking(false);
+        return;
+      }
+      setPhotoFile(result.file);
+      setPhotoPreview(result.url);
       setStep('details');
       setRetaking(false);
     };
@@ -139,6 +146,7 @@ export default function CheckInPage() {
         current_streak: profile.current_streak + 1,
         longest_streak: Math.max(profile.longest_streak, profile.current_streak + 1),
       });
+      await refetch();
       setStep('success');
     } catch (err) {
       toast({ title: 'Error', description: 'Check-in failed. Try again.', variant: 'destructive' });
