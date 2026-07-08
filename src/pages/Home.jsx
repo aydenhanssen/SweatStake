@@ -5,12 +5,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { TIERS } from '@/lib/constants';
 import TierBadge from '@/components/shared/TierBadge';
 import StatCard from '@/components/shared/StatCard';
-import { Flame, Trophy, Coins, Dumbbell, Clock, Zap, ChevronRight, Plus, Bell, Users } from 'lucide-react';
+import { Flame, Trophy, Coins, Dumbbell, Clock, Zap, ChevronRight, Plus, Bell, Users, Shield } from 'lucide-react';
+import { isAdmin } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 export default function Home() {
-  const { profile, loading } = useProfile();
+  const { profile, loading, user } = useProfile();
   const [activeEntry, setActiveEntry] = useState(null);
   const [challenge, setChallenge] = useState(null);
   const [loadingChallenge, setLoadingChallenge] = useState(true);
@@ -72,6 +73,11 @@ export default function Home() {
           <h1 className="text-2xl font-black text-primary tracking-tight">SWEATSTAKE</h1>
         </div>
         <div className="flex items-center gap-3">
+          {isAdmin(user?.email) && (
+            <Link to="/admin" className="p-2">
+              <Shield className="w-5 h-5 text-primary" />
+            </Link>
+          )}
           <Link to="/notifications" className="relative p-2">
             <Bell className="w-5 h-5 text-muted-foreground" />
             {unreadCount > 0 && (

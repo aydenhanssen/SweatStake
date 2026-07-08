@@ -26,6 +26,7 @@ import CreateChallenge from '@/pages/CreateChallenge';
 import Wallet from '@/pages/Wallet';
 import Results from '@/pages/Results';
 import Onboarding from '@/pages/Onboarding';
+import Admin from '@/pages/Admin';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -68,6 +69,7 @@ const AuthenticatedApp = () => {
         <Route path="/create-challenge" element={<CreateChallenge />} />
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/results" element={<Results />} />
+        <Route path="/admin" element={<Admin />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

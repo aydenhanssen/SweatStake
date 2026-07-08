@@ -3,7 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
 import StatCard from '@/components/shared/StatCard';
 import TierBadge from '@/components/shared/TierBadge';
-import { Settings, Dumbbell, Trophy, Coins, Flame, Target, Award, ChevronRight, Wallet } from 'lucide-react';
+import { Settings, Dumbbell, Trophy, Coins, Flame, Target, Award, ChevronRight, Wallet, Star } from 'lucide-react';
+import { isAdmin } from '@/lib/constants';
+import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -17,8 +19,24 @@ const BADGE_LABELS = {
 };
 
 export default function Profile() {
-  const { profile, loading } = useProfile();
+  const { profile, loading, user, refetch } = useProfile();
   const [activeEntries, setActiveEntries] = useState([]);
+  const [togglingPremium, setTogglingPremium] = useState(false);
+  const { toast } = useToast();
+
+  const togglePremium = async () => {
+    if (!profile) return;
+    setTogglingPremium(true);
+    try {
+      await base44.entities.UserProfile.update(profile.id, { is_premium: !profile.is_premium });
+      await refetch();
+      toast({ title: `${!profile.is_premium ? 'Premium granted' : 'Premium removed'}` });
+    } catch {
+      toast({ title: 'Update failed', variant: 'destructive' });
+    } finally {
+      setTogglingPremium(false);
+    }
+  };
 
   useEffect(() => {
     if (!profile) return;
@@ -68,6 +86,17 @@ export default function Profile() {
         <p className="text-sm text-muted-foreground capitalize">{profile.fitness_level} · {profile.primary_goal?.replace('_', ' ')}</p>
         {profile.is_premium && (
           <span className="inline-block mt-2 text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">⭐ Premium</span>
+        )}
+        {isAdmin(user?.email) && (
+          <Button
+            onClick={togglePremium}
+            disabled={togglingPremium}
+            variant={profile.is_premium ? 'outline' : 'default'}
+            className="mt-3 rounded-2xl font-bold"
+          >
+            <Star className={`w-4 h-4 ${profile.is_premium ? 'fill-current' : ''}`} />
+            {profile.is_premium ? 'Remove Premium' : 'Grant Premium'}
+          </Button>
         )}
       </div>
 

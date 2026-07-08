@@ -20,3 +20,6 @@ export const GOALS = {
 };
 
 export const PLATFORM_FEE = 0.10;
+
+export const ADMIN_EMAIL = 'justaydenhanssen@gmail.com';
+export const isAdmin = (email) => email?.toLowerCase() === ADMIN_EMAIL;
