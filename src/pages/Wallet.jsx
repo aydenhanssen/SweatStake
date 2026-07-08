@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Coins, Lock, TrendingUp, Gift, Plus, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, Coins, Lock, TrendingUp, Gift, Plus, ArrowDownLeft, ArrowUpRight, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
@@ -17,6 +17,16 @@ const TYPE_META = {
   signup_bonus: { icon: Gift, color: 'text-primary', sign: '+' },
 };
 
+const BONUS_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+function formatCountdown(ms) {
+  if (ms <= 0) return '00:00:00';
+  const h = Math.floor(ms / (1000 * 60 * 60));
+  const m = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  const s = Math.floor((ms % (1000 * 60)) / 1000);
+  return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+}
+
 export default function Wallet() {
   const { profile, refetch } = useProfile();
   const [transactions, setTransactions] = useState([]);
@@ -24,7 +34,7 @@ export default function Wallet() {
   const [totalWinnings, setTotalWinnings] = useState(0);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
-  const [bonusClaimedToday, setBonusClaimedToday] = useState(false);
+  const [now, setNow] = useState(Date.now());
   const { toast } = useToast();
 
   const loadData = useCallback(async () => {
@@ -37,12 +47,6 @@ export default function Wallet() {
       setTransactions(txns);
       setPendingStakes(activeEntries.reduce((sum, e) => sum + e.stake_amount, 0));
       setTotalWinnings(profile.total_points_won || 0);
-
-      const today = new Date().toDateString();
-      const claimedToday = txns.some(
-        (t) => t.type === 'daily_bonus' && new Date(t.created_date).toDateString() === today
-      );
-      setBonusClaimedToday(claimedToday);
     } catch (err) {
       console.error(err);
     } finally {
@@ -54,13 +58,26 @@ export default function Wallet() {
     loadData();
   }, [loadData]);
 
+  // Tick every second for countdown
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const lastClaimMs = profile?.last_bonus_claim ? new Date(profile.last_bonus_claim).getTime() : 0;
+  const nextAvailable = lastClaimMs + BONUS_COOLDOWN_MS;
+  const msRemaining = nextAvailable - now;
+  const onCooldown = msRemaining > 0;
+
   const claimDailyBonus = async () => {
-    if (!profile || claiming || bonusClaimedToday) return;
+    if (!profile || claiming || onCooldown) return;
     setClaiming(true);
     try {
       const newBalance = profile.points_balance + 10;
+      const claimTime = new Date().toISOString();
       await base44.entities.UserProfile.update(profile.id, {
         points_balance: newBalance,
+        last_bonus_claim: claimTime,
       });
       await base44.entities.Transaction.create({
         user_id: profile.user_id,
@@ -140,17 +157,29 @@ export default function Wallet() {
           </div>
           <div>
             <p className="text-sm font-bold text-foreground">Daily Bonus</p>
-            <p className="text-xs text-muted-foreground">{bonusClaimedToday ? 'Claimed today — come back tomorrow' : 'Claim 10 free points'}</p>
+            <p className="text-xs text-muted-foreground">
+              {onCooldown ? 'Come back tomorrow' : 'Claim 10 free points'}
+            </p>
           </div>
         </div>
-        <Button
-          onClick={claimDailyBonus}
-          disabled={bonusClaimedToday || claiming}
-          size="sm"
-          className="font-bold rounded-xl"
-        >
-          {claiming ? '...' : bonusClaimedToday ? 'Claimed' : '+10'}
-        </Button>
+        {onCooldown ? (
+          <div className="text-right">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Clock className="w-3.5 h-3.5" />
+              <span className="font-mono text-sm font-bold text-foreground tabular-nums">{formatCountdown(msRemaining)}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">until reset</p>
+          </div>
+        ) : (
+          <Button
+            onClick={claimDailyBonus}
+            disabled={claiming}
+            size="sm"
+            className="font-bold rounded-xl"
+          >
+            {claiming ? '...' : '+10'}
+          </Button>
+        )}
       </div>
 
       {/* Get More Points */}
