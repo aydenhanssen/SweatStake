@@ -72,9 +72,11 @@ export default function Home() {
     <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xl font-black text-primary tracking-tight">SWEATSTAKE</h1>
-        <div className="flex items-center gap-2">
+        <h1 className="text-xl font-black text-primary tracking-tight flex-shrink-0">SWEATSTAKE</h1>
+        <div className="flex items-center justify-center flex-1">
           <PhantomWalletButton />
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
           {isAdmin(user?.email) && (
             <Link to="/admin" className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-card transition-colors">
               <Shield className="w-5 h-5 text-primary" />
