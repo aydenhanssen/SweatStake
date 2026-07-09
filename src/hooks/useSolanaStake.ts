@@ -3,10 +3,18 @@ import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } f
 import { base44 } from '@/api/base44Client';
 import { usePhantomWallet } from '@/lib/phantomWallet';
 
-// ─── Configuration ───────────────────────────────────────────────
-// Using devnet for testing — flip to mainnet RPC (VITE_HELIUS_RPC_URL)
-// when the escrow program is ready for production.
-const DEVNET_RPC = 'https://api.devnet.solana.com';
+// ─── Network Configuration ──────────────────────────────────────
+// Default to 'devnet' for safety during development.
+// Switch to mainnet before launch — set DEFAULT_NETWORK to 'mainnet'
+// or always pass network: 'mainnet' from the caller.
+const DEFAULT_NETWORK = 'devnet' as 'devnet' | 'mainnet';
+
+const RPC_ENDPOINTS = {
+  // Devnet for testing — free, rate-limited
+  devnet: 'https://api.devnet.solana.com',
+  // Mainnet uses the Helius RPC configured via env, matching phantomWallet.jsx
+  mainnet: import.meta.env.VITE_HELIUS_RPC_URL || 'https://api.mainnet-beta.solana.com',
+};
 
 // TODO: Replace this hardcoded treasury with a Program Derived Address (PDA)
 // once the on-chain escrow program is deployed. Each challenge should derive
@@ -17,24 +25,37 @@ const TREASURY_WALLET = '5ZWjBo9ooooYoeZzB7ko3C7aQ4mrqgFAj1mh3w7hqLxJ';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
+export type SolanaNetwork = 'devnet' | 'mainnet';
+
+export interface StakeParams {
+  challengeId: string;
+  amountInSOL: number;
+  /** Override the default network. Defaults to 'devnet' for dev safety. */
+  network?: SolanaNetwork;
+}
+
 export interface StakeResult {
   signature: string;
   explorerUrl: string;
+  network: SolanaNetwork;
 }
 
 export interface UseSolanaStakeReturn {
   loading: boolean;
   error: string | null;
-  stakeOnChallenge: (challengeId: string, amountInSOL: number) => Promise<StakeResult>;
+  stakeOnChallenge: (params: StakeParams) => Promise<StakeResult>;
 }
 
 /**
  * useSolanaStake — stakes SOL on a challenge via Phantom, confirms the
  * transaction on-chain, then updates the Base44 Challenge entity.
  *
+ * Network: defaults to devnet; pass network: 'mainnet' or change
+ * DEFAULT_NETWORK for production.
+ *
  * Upgrade path:
  *   1. Replace SystemProgram.transfer → escrow program instruction (PDA)
- *   2. Replace devnet → mainnet RPC
+ *   2. Switch DEFAULT_NETWORK → 'mainnet'
  *   3. Store challenge ID in the on-chain instruction data for provenance
  */
 export function useSolanaStake(): UseSolanaStakeReturn {
@@ -45,7 +66,7 @@ export function useSolanaStake(): UseSolanaStakeReturn {
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   const stakeOnChallenge = useCallback(
-    async (challengeId: string, amountInSOL: number): Promise<StakeResult> => {
+    async ({ challengeId, amountInSOL, network = DEFAULT_NETWORK }: StakeParams): Promise<StakeResult> => {
       setError(null);
 
       if (!connected || !address) {
@@ -62,7 +83,10 @@ export function useSolanaStake(): UseSolanaStakeReturn {
 
       setLoading(true);
 
-      const connection = new Connection(DEVNET_RPC, 'confirmed');
+      // Use the same RPC endpoint as the wallet provider for mainnet,
+      // or the public devnet endpoint for testing.
+      const rpcUrl = RPC_ENDPOINTS[network];
+      const connection = new Connection(rpcUrl, 'confirmed');
       const fromPubkey = new PublicKey(address);
       const toPubkey = new PublicKey(TREASURY_WALLET);
       const lamports = Math.round(amountInSOL * LAMPORTS_PER_SOL);
@@ -115,7 +139,7 @@ export function useSolanaStake(): UseSolanaStakeReturn {
         throw new Error(msg);
       }
 
-      const explorerUrl = `https://solscan.io/tx/${signature}?cluster=devnet`;
+      const explorerUrl = `https://solscan.io/tx/${signature}?cluster=${network}`;
 
       // ─── Update Base44: add participant + increase pot ────────────
       try {
@@ -130,11 +154,11 @@ export function useSolanaStake(): UseSolanaStakeReturn {
         // user should keep the explorer link for manual reconciliation.
         setError(`Stake confirmed but DB update failed: ${err.message}`);
         setLoading(false);
-        return { signature, explorerUrl };
+        return { signature, explorerUrl, network };
       }
 
       setLoading(false);
-      return { signature, explorerUrl };
+      return { signature, explorerUrl, network };
     },
     [connected, address]
   );
