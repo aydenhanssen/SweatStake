@@ -7,7 +7,11 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Coins, Lock, Crown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import PhantomWalletButton from '@/components/wallet/PhantomWalletButton';
+import StakeSolModal from '@/components/wallet/StakeSolModal';
+import { usePhantomWallet } from '@/lib/phantomWallet';
 
 export default function Challenges() {
   const { profile, refetch } = useProfile();
@@ -15,9 +19,13 @@ export default function Challenges() {
   const [loading, setLoading] = useState(true);
   const [selectedTier, setSelectedTier] = useState(null);
   const [stakeAmount, setStakeAmount] = useState(50);
+  const [solStakeAmount, setSolStakeAmount] = useState(0.1);
   const [joining, setJoining] = useState(false);
+  const [showSolModal, setShowSolModal] = useState(false);
+  const [pendingChallenge, setPendingChallenge] = useState(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { connected: walletConnected, address: walletAddress } = usePhantomWallet();
 
   useEffect(() => {
     async function load() {
@@ -40,6 +48,22 @@ export default function Challenges() {
       toast({ title: 'Insufficient points', description: "You don't have enough points for this stake.", variant: 'destructive' });
       return;
     }
+    if (!walletConnected) {
+      toast({ title: 'Wallet required', description: 'Connect your Phantom wallet to join.', variant: 'destructive' });
+      return;
+    }
+    if (solStakeAmount <= 0) {
+      toast({ title: 'SOL stake required', description: 'Enter a SOL amount to stake.', variant: 'destructive' });
+      return;
+    }
+    setPendingChallenge(challenge);
+    setShowSolModal(true);
+  };
+
+  const handleSolSuccess = async (txSig, solAmount) => {
+    if (!pendingChallenge) return;
+    const challenge = pendingChallenge;
+    const tier = TIERS[challenge.tier];
     setJoining(true);
     try {
       await base44.entities.ChallengeEntry.create({
@@ -49,6 +73,8 @@ export default function Challenges() {
         tier: challenge.tier,
         stake_amount: stakeAmount,
         checkins_required: tier.workouts,
+        sol_stake_amount: solAmount,
+        sol_tx_signature: txSig,
       });
       await base44.entities.Challenge.update(challenge.id, {
         total_pot: challenge.total_pot + stakeAmount,
@@ -56,13 +82,15 @@ export default function Challenges() {
       });
       await base44.entities.UserProfile.update(profile.id, {
         points_balance: profile.points_balance - stakeAmount,
+        wallet_address: walletAddress,
       });
-      toast({ title: 'You\'re in! 🔥', description: `Staked ${stakeAmount} points on the ${tier.label} challenge.` });
+      toast({ title: 'You\'re in! 🔥', description: `Staked ${stakeAmount} points + ${solAmount} SOL on the ${tier.label} challenge.` });
       navigate('/');
     } catch (err) {
       toast({ title: 'Error', description: 'Could not join challenge.', variant: 'destructive' });
     } finally {
       setJoining(false);
+      setPendingChallenge(null);
     }
   };
 
@@ -83,7 +111,16 @@ export default function Challenges() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-xl font-black">Join a Challenge</h1>
+        <div className="ml-auto">
+          <PhantomWalletButton />
+        </div>
       </div>
+
+      {!walletConnected && (
+        <div className="bg-[#AB9FF2]/10 border border-[#AB9FF2]/30 rounded-2xl p-3 mb-4 text-center">
+          <p className="text-sm text-foreground font-semibold">Connect your Phantom wallet to join and stake SOL</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         {Object.entries(TIERS).map(([key, tier]) => {
@@ -128,7 +165,7 @@ export default function Challenges() {
               {isSelected && ch && (
                 <div className="mt-4 pt-4 border-t border-border">
                   <p className="text-sm text-muted-foreground mb-2">
-                    Stake amount: <span className="font-bold text-foreground">{stakeAmount} pts</span>
+                    Points stake: <span className="font-bold text-foreground">{stakeAmount} pts</span>
                   </p>
                   <Slider
                     value={[stakeAmount]}
@@ -138,16 +175,30 @@ export default function Challenges() {
                     step={10}
                     className="mb-4"
                   />
+                  <div className="mb-4">
+                    <label className="text-sm font-bold text-foreground mb-2 block">SOL Stake</label>
+                    <Input
+                      type="number"
+                      value={solStakeAmount}
+                      onChange={(e) => setSolStakeAmount(parseFloat(e.target.value) || 0)}
+                      step="0.01"
+                      min="0.01"
+                      className="bg-secondary border-border rounded-2xl h-11 font-bold"
+                    />
+                  </div>
                   <p className="text-xs text-muted-foreground mb-4">
                     Current pot: <span className="font-semibold text-primary">{ch.total_pot?.toLocaleString()} pts</span>
                   </p>
                   <Button
                     onClick={() => handleJoin(ch)}
-                    disabled={joining}
+                    disabled={joining || !walletConnected}
                     className="w-full h-12 font-black rounded-2xl text-base"
                   >
-                    {joining ? 'Joining...' : `Stake ${stakeAmount} Points`}
+                    {joining ? 'Joining...' : `Stake ${stakeAmount} pts + ${solStakeAmount} SOL`}
                   </Button>
+                  {!walletConnected && (
+                    <p className="text-xs text-destructive text-center mt-2 font-semibold">Connect Phantom to join</p>
+                  )}
                 </div>
               )}
 
@@ -160,6 +211,13 @@ export default function Challenges() {
           );
         })}
       </div>
+
+      <StakeSolModal
+        open={showSolModal}
+        amount={solStakeAmount}
+        onClose={() => { setShowSolModal(false); setPendingChallenge(null); }}
+        onSuccess={handleSolSuccess}
+      />
     </div>
   );
 }

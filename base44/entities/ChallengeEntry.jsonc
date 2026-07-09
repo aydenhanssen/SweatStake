@@ -46,6 +46,13 @@
     "points_lost": {
       "type": "number",
       "default": 0
+    },
+    "sol_stake_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "sol_tx_signature": {
+      "type": "string"
     }
   },
   "required": [

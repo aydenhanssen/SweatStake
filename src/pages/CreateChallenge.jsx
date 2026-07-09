@@ -9,6 +9,9 @@ import { ArrowLeft, Users, Coins, Lock, Crown, Globe, Check, Loader2 } from 'luc
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
+import PhantomWalletButton from '@/components/wallet/PhantomWalletButton';
+import StakeSolModal from '@/components/wallet/StakeSolModal';
+import { usePhantomWallet } from '@/lib/phantomWallet';
 
 const DURATIONS = [
   { key: '1w', label: '1 Week', weeks: 1 },
@@ -25,8 +28,11 @@ export default function CreateChallenge() {
   const [isPublic, setIsPublic] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [solStakeAmount, setSolStakeAmount] = useState(0.1);
+  const [showSolModal, setShowSolModal] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { connected: walletConnected, address: walletAddress } = usePhantomWallet();
 
   const tier = TIERS[selectedTier];
   const dur = DURATIONS.find(d => d.key === duration);
@@ -52,7 +58,27 @@ export default function CreateChallenge() {
       toast({ title: 'Insufficient points', description: "You don't have enough points for this stake.", variant: 'destructive' });
       return;
     }
+    if (!walletConnected) {
+      toast({ title: 'Wallet required', description: 'Connect your Phantom wallet to create a challenge.', variant: 'destructive' });
+      return;
+    }
+    if (solStakeAmount <= 0) {
+      toast({ title: 'SOL stake required', description: 'Enter a SOL amount to stake.', variant: 'destructive' });
+      return;
+    }
 
+    if (solStakeAmount > 0) {
+      setShowSolModal(true);
+      return;
+    }
+    await createChallenge(null, 0);
+  };
+
+  const handleSolSuccess = async (txSig, solAmount) => {
+    await createChallenge(txSig, solAmount);
+  };
+
+  const createChallenge = async (solTxSig, solAmount) => {
     setSubmitting(true);
     try {
       const now = new Date();
@@ -78,10 +104,13 @@ export default function CreateChallenge() {
         checkins_required: tier.workouts,
         checkins_completed: 0,
         status: 'active',
+        sol_stake_amount: solAmount,
+        sol_tx_signature: solTxSig,
       });
 
       await base44.entities.UserProfile.update(profile.id, {
         points_balance: profile.points_balance - stakeAmount,
+        wallet_address: walletAddress,
       });
 
       await refetch();
@@ -133,6 +162,9 @@ export default function CreateChallenge() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-xl font-black">Create Challenge</h1>
+        <div className="ml-auto">
+          <PhantomWalletButton />
+        </div>
       </div>
 
       {/* Challenge Name */}
@@ -229,6 +261,27 @@ export default function CreateChallenge() {
         </div>
       </div>
 
+      {/* SOL Stake Amount */}
+      <div className="mb-5">
+        <label className="text-sm font-bold text-foreground mb-2 block">Stake SOL (via Phantom)</label>
+        <div className="relative">
+          <Input
+            type="number"
+            value={solStakeAmount}
+            onChange={(e) => setSolStakeAmount(parseFloat(e.target.value) || 0)}
+            step="0.01"
+            min="0.01"
+            className="bg-card border-border rounded-2xl h-12 pr-16 text-lg font-bold"
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#AB9FF2]">SOL</span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          {walletConnected
+            ? 'You\'ll confirm this transaction in Phantom before your challenge goes live.'
+            : 'Connect your Phantom wallet to stake SOL.'}
+        </p>
+      </div>
+
       {/* Privacy Toggle */}
       <div className="mb-6">
         <label className="text-sm font-bold text-foreground mb-3 block">Visibility</label>
@@ -271,7 +324,7 @@ export default function CreateChallenge() {
       {/* Submit */}
       <Button
         onClick={handleSubmit}
-        disabled={submitting || !name.trim() || stakeAmount < 10}
+        disabled={submitting || !name.trim() || stakeAmount < 10 || !walletConnected}
         className="w-full h-14 text-lg font-black rounded-2xl"
       >
         {submitting ? (
@@ -279,9 +332,19 @@ export default function CreateChallenge() {
             <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Creating...
           </>
         ) : (
-          <>Confirm & Stake {stakeAmount} pts</>
+          <>Confirm & Stake</>
         )}
       </Button>
+      {!walletConnected && (
+        <p className="text-xs text-destructive text-center mt-2 font-semibold">Connect Phantom wallet to continue</p>
+      )}
+
+      <StakeSolModal
+        open={showSolModal}
+        amount={solStakeAmount}
+        onClose={() => setShowSolModal(false)}
+        onSuccess={handleSolSuccess}
+      />
     </div>
   );
 }

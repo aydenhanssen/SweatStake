@@ -9,6 +9,7 @@ import { Flame, Trophy, Coins, Dumbbell, Clock, Zap, ChevronRight, Plus, Bell, U
 import { isAdmin } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import PhantomWalletButton from '@/components/wallet/PhantomWalletButton';
 
 export default function Home() {
   const { profile, loading, user } = useProfile();
@@ -73,6 +74,7 @@ export default function Home() {
           <h1 className="text-2xl font-black text-primary tracking-tight">SWEATSTAKE</h1>
         </div>
         <div className="flex items-center gap-3">
+          <PhantomWalletButton />
           {isAdmin(user?.email) && (
             <Link to="/admin" className="p-2">
               <Shield className="w-5 h-5 text-primary" />

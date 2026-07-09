@@ -88,6 +88,9 @@
     "last_bonus_claim": {
       "type": "string",
       "format": "date-time"
+    },
+    "wallet_address": {
+      "type": "string"
     }
   },
   "required": [

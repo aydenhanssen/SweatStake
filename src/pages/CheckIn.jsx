@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import VerificationCamera from '@/components/checkin/VerificationCamera';
 import { burnWatermark } from '@/components/checkin/burnWatermark';
+import PayoutModal from '@/components/wallet/PayoutModal';
+import { usePhantomWallet } from '@/lib/phantomWallet';
 
 const workoutIcons = {
   push: ArrowUp,
@@ -31,8 +33,10 @@ export default function CheckInPage() {
   const [activeEntry, setActiveEntry] = useState(null);
   const [updatedEntry, setUpdatedEntry] = useState(null);
   const [entryLoaded, setEntryLoaded] = useState(false);
+  const [showPayout, setShowPayout] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { connected: walletConnected } = usePhantomWallet();
 
   const goalName = profile ? (GOALS[profile.primary_goal] || profile.primary_goal || '') : '';
 
@@ -95,6 +99,10 @@ export default function CheckInPage() {
         longest_streak: Math.max(profile.longest_streak, profile.current_streak + 1),
       });
       await refetch();
+      // If challenge is now complete, trigger payout
+      if (updated.checkins_completed >= updated.checkins_required) {
+        setShowPayout(true);
+      }
       setStep('success');
     } catch (err) {
       toast({ title: 'Error', description: 'Check-in failed. Try again.', variant: 'destructive' });
@@ -265,6 +273,12 @@ export default function CheckInPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PayoutModal
+        open={showPayout}
+        amount={activeEntry?.sol_stake_amount || 0.1}
+        onClose={() => setShowPayout(false)}
+      />
     </div>
   );
 }
