@@ -71,18 +71,18 @@ export default function Home() {
   return (
     <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-10">
-        <h1 className="text-2xl font-black font-heading tracking-tight text-gradient-gold flex-shrink-0">SWEATSTAKE</h1>
-        <div className="flex items-center justify-center flex-1 px-4">
+      <div className="flex items-center justify-between mb-12 px-1">
+        <h1 className="text-xl font-black font-heading tracking-[0.15em] text-gradient-gold flex-shrink-0">SWEATSTAKE</h1>
+        <div className="flex items-center justify-center flex-1 px-8">
           <PhantomWalletButton />
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {isAdmin(user?.email) && (
-            <Link to="/admin" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+            <Link to="/admin" className="w-10 h-10 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
               <Shield className="w-4 h-4 text-primary" />
             </Link>
           )}
-          <Link to="/notifications" className="relative w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+          <Link to="/notifications" className="relative w-10 h-10 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
             <Bell className="w-4 h-4 text-muted-foreground" />
             {unreadCount > 0 && (
               <span className="absolute top-1 right-1 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white">
@@ -91,7 +91,7 @@ export default function Home() {
             )}
           </Link>
           <Link to="/profile">
-            <div className="w-9 h-9 rounded-full bg-secondary overflow-hidden border border-border hover:border-primary/30 transition-all">
+            <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden border border-border hover:border-primary/30 transition-all">
               {profile.photo_url ? (
                 <img src={profile.photo_url} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -108,13 +108,15 @@ export default function Home() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl p-8 mb-6 premium-border-glow glow-primary"
+        className="relative overflow-hidden rounded-[2rem] p-8 mb-6 premium-border-glow glow-primary"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-violet/5 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-primary/5 animate-gradient-shift" style={{ backgroundSize: '200% 200%' }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-violet/8 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-violet/5 via-transparent to-primary/10 animate-gradient-shift" style={{ backgroundSize: '200% 200%' }} />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet/10 rounded-full blur-3xl" />
         <div className="relative">
-          <p className="text-xs text-primary/80 font-bold uppercase tracking-widest font-heading">Your SOL Balance</p>
-          <p className="text-5xl font-black text-gradient-gold mt-2 font-heading">
+          <p className="text-xs text-primary/80 font-bold uppercase tracking-[0.2em] font-heading">Your SOL Balance</p>
+          <p className="text-5xl font-black text-gradient-gold mt-2 font-heading drop-shadow-[0_0_20px_hsl(43_96%_56%_/_0.3)]">
             {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
           </p>
           <p className="text-sm text-muted-foreground mt-2 font-medium">
@@ -182,14 +184,14 @@ export default function Home() {
           transition={{ delay: 0.1 }}
           className="premium-card rounded-3xl p-8 mb-6 text-center"
         >
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Dumbbell className="w-8 h-8 text-primary" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500/15 to-primary/10 flex items-center justify-center mx-auto mb-4 glow-primary">
+            <Flame className="w-8 h-8 text-orange-400" />
           </div>
           <h3 className="font-bold font-heading text-lg text-foreground mb-1">No Active Challenge</h3>
           <p className="text-sm text-muted-foreground mb-5">Create or join a challenge and put your SOL on the line</p>
           <div className="flex flex-col gap-2.5">
             <Link to="/create-challenge">
-              <Button className="w-full h-14 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 text-primary-foreground shadow-lg shadow-primary/40 ring-1 ring-primary/30 animate-glow-pulse transition-all hover:scale-[1.02]">
+              <Button className="w-full h-14 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 text-primary-foreground shadow-[0_0_30px_hsl(43_96%_56%_/_0.4)] ring-2 ring-primary/40 ring-offset-2 ring-offset-background animate-glow-pulse transition-all hover:scale-[1.02]">
                 <Plus className="w-5 h-5 mr-2" /> Create a Challenge
               </Button>
             </Link>
