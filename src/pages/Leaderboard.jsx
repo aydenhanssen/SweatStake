@@ -116,7 +116,7 @@ export default function Leaderboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={`font-bold text-sm truncate ${isMe ? 'text-primary' : 'text-foreground'}`}>
-                    {p.username} {isMe && '(You)'}
+                    <span className="break-all">{p.username}</span> {isMe && '(You)'}
                   </p>
                 </div>
                 <p className={`text-sm font-bold ${isTop3 ? 'text-gradient-gold' : 'text-muted-foreground'}`}>{value}</p>
