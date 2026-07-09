@@ -155,8 +155,8 @@ export default function CreateChallenge() {
               <Input
                 id="stake"
                 type="number"
-                step="0.1"
-                min="0.1"
+                step="0.01"
+                min="0.01"
                 value={stakeAmount}
                 onChange={(e) => setStakeAmount(parseFloat(e.target.value) || 0)}
                 className="bg-secondary border-border rounded-xl h-11"
