@@ -20,11 +20,11 @@ import { usePhantomWallet } from "@/lib/phantomWallet";
 import { useSolanaStake } from "@/hooks/useSolanaStake";
 
 const formSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters long"),
-  description: z.string().min(15, "Please write a longer description"),
-  durationDays: z.number().min(7, "Minimum 7 days").max(90),
+  title: z.string().min(5, "Title must be at least 5 characters"),
+  description: z.string().min(15, "Description must be longer"),
+  durationDays: z.number().min(7).max(90),
   frequency: z.enum(["daily", "3x/week", "5x/week", "custom"]),
-  stakeAmount: z.number().min(0.01, "Minimum stake is 0.01 SOL"),
+  stakeAmount: z.number().min(0.01, "Minimum 0.01 SOL"),
   isPublic: z.boolean(),
   endDate: z.date(),
 });
@@ -38,7 +38,6 @@ export default function CreateChallenge() {
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    mode: "onSubmit",
     defaultValues: {
       title: "",
       description: "",
@@ -54,7 +53,7 @@ export default function CreateChallenge() {
   const isPublic = form.watch("isPublic");
 
   const onSubmit = async (data) => {
-    console.log("✅ Form submitted successfully!", data);
+    console.log("Form submitted with:", data); // Debug
 
     if (!wallet.connected) {
       toast.error("Please connect your Phantom wallet");
@@ -65,7 +64,8 @@ export default function CreateChallenge() {
     const toastId = toast.loading("Creating challenge...");
 
     try {
-      const challenge = await /* YOUR BASE44 CREATE CALL HERE */ ("Challenge", {
+      // === REPLACE THIS LINE WITH YOUR ACTUAL BASE44 CREATE CALL ===
+      const challenge = await base44.entities.Challenge.create({   // ←←← CHANGE THIS IF YOUR METHOD IS DIFFERENT
         title: data.title,
         description: data.description,
         duration_days: data.durationDays,
@@ -73,19 +73,23 @@ export default function CreateChallenge() {
         stake_amount: data.stakeAmount,
         frequency: data.frequency,
         is_public: data.isPublic,
+        creator: wallet.publicKey?.toString(),
+        status: "active",
       });
+
+      toast.loading("Staking SOL on Solana...", { id: toastId });
 
       await stakeOnChallenge({
         challengeId: challenge.id,
         amountInSOL: data.stakeAmount,
       });
 
-      toast.success("Challenge created & staked!", { id: toastId });
+      toast.success("Challenge created and SOL staked!", { id: toastId });
       navigate(`/challenge/${challenge.id}`);
 
     } catch (error) {
-      console.error(error);
-      toast.error("Error: " + error.message, { id: toastId });
+      console.error("Full error:", error);
+      toast.error(error.message || "Failed to create challenge", { id: toastId });
     } finally {
       setIsCreating(false);
     }
@@ -93,40 +97,81 @@ export default function CreateChallenge() {
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
+      {/* Back Button */}
       <div className="mb-8">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
-          <ArrowLeft className="w-5 h-5" /> Back
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-lg"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl flex items-center gap-3">
-            <Trophy className="text-yellow-400" /> Create New SweatStake
+          <CardTitle className="flex items-center gap-3 text-3xl">
+            <Trophy className="w-8 h-8 text-yellow-400" /> 
+            Create New SweatStake
           </CardTitle>
+          <CardDescription>Skin in the game. Real accountability.</CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div>
-              <Label>Title</Label>
-              <Input {...form.register("title")} placeholder="Gym 5x/week for 30 days" />
-              {form.formState.errors.title && <p className="text-red-500 text-sm">{form.formState.errors.title.message}</p>}
+              <Label htmlFor="title">Challenge Title</Label>
+              <Input id="title" placeholder="Gym 5x a week for 30 days" {...form.register("title")} />
+              {form.formState.errors.title && <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>}
             </div>
 
             <div>
-              <Label>Description</Label>
-              <Textarea {...form.register("description")} placeholder="I will..." rows={4} />
-              {form.formState.errors.description && <p className="text-red-500 text-sm">{form.formState.errors.description.message}</p>}
+              <Label htmlFor="description">Describe your goal</Label>
+              <Textarea id="description" placeholder="I will go to the gym..." rows={4} {...form.register("description")} />
+              {form.formState.errors.description && <p className="text-red-500 text-sm mt-1">{form.formState.errors.description.message}</p>}
             </div>
 
             <div>
-              <Label>Stake Amount (SOL)</Label>
-              <Input type="number" step="0.01" {...form.register("stakeAmount", { valueAsNumber: true })} />
+              <Label>Duration ({form.watch("durationDays")} days)</Label>
+              <Slider
+                min={7}
+                max={90}
+                value={[form.watch("durationDays")]}
+                onValueChange={(v) => form.setValue("durationDays", v[0])}
+                className="mt-3"
+              />
             </div>
 
-            <Button type="submit" className="w-full py-7 text-lg" disabled={isCreating}>
-              {isCreating ? "Creating & Staking..." : `Stake ${stakeAmount} SOL & Create Challenge`}
+            <div>
+              <Label>Your Stake (SOL)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                {...form.register("stakeAmount", { valueAsNumber: true })}
+                className="text-3xl font-bold"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Public Challenge</Label>
+                <p className="text-sm text-muted-foreground">Anyone can join</p>
+              </div>
+              <Switch
+                checked={isPublic}
+                onCheckedChange={(v) => form.setValue("isPublic", v)}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full py-7 text-lg font-semibold"
+              disabled={isCreating}
+            >
+              {isCreating ? "Creating & Staking on Solana..." : `Stake ${stakeAmount} SOL & Create Challenge`}
             </Button>
           </form>
         </CardContent>
