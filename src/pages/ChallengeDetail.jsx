@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useBase44 } from "@base44/sdk"; // or your existing base44 client
-import { usePhantomWallet } from "@/hooks/usePhantomWallet"; // your existing hook
+import { base44 } from "@/api/base44Client";
+import { usePhantomWallet } from "@/lib/phantomWallet";
 import { useSolanaStake } from "@/hooks/useSolanaStake";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,39 +10,36 @@ import { Trophy, Users, Clock, Wallet } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function ChallengeDetail() {
-  const { id } = useParams(); // challenge id from URL
+  const { id } = useParams();
   const navigate = useNavigate();
-  
-  const { getEntity } = useBase44();
-  const wallet = usePhantomWallet();
-  const { stakeOnChallenge } = useSolanaStake();
+
+  const { connected, address } = usePhantomWallet();
+  const { stakeOnChallenge, loading: staking } = useSolanaStake();
 
   const [challenge, setChallenge] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [staking, setStaking] = useState(false);
+
+  const fetchChallenge = async () => {
+    try {
+      const data = await base44.entities.Challenge.get(id);
+      setChallenge(data);
+    } catch (err) {
+      toast.error("Failed to load challenge");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchChallenge = async () => {
-      try {
-        const data = await getEntity("Challenge", id);
-        setChallenge(data);
-      } catch (err) {
-        toast.error("Failed to load challenge");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (id) fetchChallenge();
   }, [id]);
 
   const handleJoinAndStake = async (amount = 0.5) => {
-    if (!wallet.connected) {
+    if (!connected) {
       toast.error("Please connect your wallet");
       return;
     }
 
-    setStaking(true);
     const toastId = toast.loading("Staking SOL...");
 
     try {
@@ -52,21 +49,18 @@ export default function ChallengeDetail() {
       });
 
       toast.success(`Successfully staked ${amount} SOL!`, { id: toastId });
-
-      // Refresh challenge data
-      const updated = await getEntity("Challenge", id);
-      setChallenge(updated);
+      await fetchChallenge();
     } catch (error) {
       toast.error(error.message || "Staking failed", { id: toastId });
-    } finally {
-      setStaking(false);
     }
   };
 
   if (loading) return <div className="text-center py-20">Loading challenge...</div>;
   if (!challenge) return <div>Challenge not found</div>;
 
-  const progress = Math.round((challenge.daysCompleted / challenge.durationDays) * 100) || 0;
+  const progress = Math.round(
+    ((challenge.daysCompleted || 0) / (challenge.duration_days || 1)) * 100
+  ) || 0;
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
@@ -75,12 +69,14 @@ export default function ChallengeDetail() {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-3xl">{challenge.title}</CardTitle>
-              <CardDescription className="mt-2 text-lg">
-                {challenge.description}
-              </CardDescription>
+              {challenge.description && (
+                <CardDescription className="mt-2 text-lg">
+                  {challenge.description}
+                </CardDescription>
+              )}
             </div>
-            <Badge variant={challenge.isPublic ? "default" : "secondary"}>
-              {challenge.isPublic ? "Public" : "Private"}
+            <Badge variant={challenge.is_public ? "default" : "secondary"}>
+              {challenge.is_public ? "Public" : "Private"}
             </Badge>
           </div>
         </CardHeader>
@@ -91,7 +87,7 @@ export default function ChallengeDetail() {
             <Card>
               <CardContent className="pt-6">
                 <Wallet className="w-8 h-8 mb-2" />
-                <p className="text-3xl font-bold">{challenge.totalStaked || 0} SOL</p>
+                <p className="text-3xl font-bold">{challenge.sol_total_pot || 0} SOL</p>
                 <p className="text-sm text-muted-foreground">Total Pot</p>
               </CardContent>
             </Card>
@@ -99,7 +95,7 @@ export default function ChallengeDetail() {
             <Card>
               <CardContent className="pt-6">
                 <Users className="w-8 h-8 mb-2" />
-                <p className="text-3xl font-bold">{challenge.participants?.length || 0}</p>
+                <p className="text-3xl font-bold">{challenge.participant_count || 0}</p>
                 <p className="text-sm text-muted-foreground">Participants</p>
               </CardContent>
             </Card>
@@ -107,7 +103,7 @@ export default function ChallengeDetail() {
             <Card>
               <CardContent className="pt-6">
                 <Clock className="w-8 h-8 mb-2" />
-                <p className="text-3xl font-bold">{challenge.durationDays}</p>
+                <p className="text-3xl font-bold">{challenge.duration_days || 0}</p>
                 <p className="text-sm text-muted-foreground">Days</p>
               </CardContent>
             </Card>
@@ -122,16 +118,14 @@ export default function ChallengeDetail() {
           </div>
 
           {/* Join / Stake Button */}
-          {!challenge.participants?.includes(wallet.publicKey?.toString()) && (
-            <Button 
-              size="lg" 
-              className="w-full text-lg py-7"
-              onClick={() => handleJoinAndStake(0.5)}
-              disabled={staking}
-            >
-              {staking ? "Staking SOL..." : `Join & Stake 0.5 SOL`}
-            </Button>
-          )}
+          <Button
+            size="lg"
+            className="w-full text-lg py-7"
+            onClick={() => handleJoinAndStake(challenge.stake_amount || 0.5)}
+            disabled={staking}
+          >
+            {staking ? "Staking SOL..." : `Join & Stake ${challenge.stake_amount || 0.5} SOL`}
+          </Button>
 
           {/* Proofs / Activity Feed (placeholder) */}
           <Card>

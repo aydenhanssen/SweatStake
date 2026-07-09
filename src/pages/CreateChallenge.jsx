@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import { CalendarIcon, Trophy, Users } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { usePhantomWallet } from "@/lib/phantomWallet";
@@ -33,6 +34,7 @@ export default function CreateChallenge() {
   const { stakeOnChallenge } = useSolanaStake();
 
   const [isCreating, setIsCreating] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -93,8 +95,8 @@ export default function CreateChallenge() {
         duration: 6000 
       });
 
-      // Optional: redirect to challenge page
-      // navigate(`/challenge/${challenge.id}`);
+      // Navigate to the new challenge detail page
+      navigate(`/challenge/${challenge.id}`);
 
     } catch (error) {
       console.error(error);
