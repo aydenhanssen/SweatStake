@@ -51,7 +51,7 @@ export default function Results() {
   const shareToX = () => {
     if (!entry) return;
     const text = entry.status === 'won'
-      ? `I just won my SweatStake challenge and earned ${entry.points_won} points 🔥🏆 #SweatStake #FitnessAccountability`
+      ? `I just won my SweatStake challenge and claimed ${(entry.sol_payout || 0).toFixed(4)} SOL 🔥🏆 #SweatStake #FitnessAccountability`
       : `I just lost my SweatStake challenge. Back stronger next week 💪 #SweatStake`;
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -77,7 +77,7 @@ export default function Results() {
   }
 
   const isWin = entry.status === 'won';
-  const pointsDiff = isWin ? entry.points_won : (entry.points_lost || entry.stake_amount);
+  const solDiff = isWin ? (entry.sol_payout || 0) : (entry.sol_stake_amount || 0);
   const winRate = (profile.challenges_won + profile.challenges_lost) > 0
     ? Math.round((profile.challenges_won / (profile.challenges_won + profile.challenges_lost)) * 100)
     : 0;
@@ -119,14 +119,14 @@ export default function Results() {
         </div>
 
         <p className={`text-3xl font-black ${isWin ? 'text-primary' : 'text-destructive'}`}>
-          {isWin ? '+' : '-'}{pointsDiff?.toLocaleString()}
+          {isWin ? '+' : '-'}{solDiff?.toFixed(4)}
         </p>
-        <p className="text-sm text-muted-foreground mt-1">{isWin ? 'points won' : 'points lost'}</p>
+        <p className="text-sm text-muted-foreground mt-1">{isWin ? 'SOL won' : 'SOL lost'}</p>
 
         {/* Message */}
         <div className={`mt-5 py-3 px-4 rounded-2xl ${isWin ? 'bg-primary/10' : 'bg-destructive/10'}`}>
           <p className={`text-sm font-bold ${isWin ? 'text-primary' : 'text-destructive'}`}>
-            {isWin ? 'SOL incoming' : 'Someone who showed up took your stake'}
+            {isWin ? 'SOL incoming to your wallet' : 'Your stake went to those who showed up'}
           </p>
         </div>
       </motion.div>

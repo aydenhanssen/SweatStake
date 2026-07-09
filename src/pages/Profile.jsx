@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
 import StatCard from '@/components/shared/StatCard';
 import TierBadge from '@/components/shared/TierBadge';
-import { Settings, Dumbbell, Trophy, Coins, Flame, Target, Award, ChevronRight, Wallet, Star } from 'lucide-react';
+import { Settings, Dumbbell, Trophy, Flame, Target, Award, ChevronRight, Wallet, Star, TrendingUp } from 'lucide-react';
 import { isAdmin } from '@/lib/constants';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -100,12 +100,12 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Points Balance */}
+      {/* SOL Won */}
       <Link to="/wallet" className="block mb-6">
         <div className="bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 rounded-3xl p-5 flex items-center justify-between transition-all hover:border-primary/40">
           <div>
-            <p className="text-xs text-primary/70 font-semibold uppercase tracking-wider">Points Balance</p>
-            <p className="text-3xl font-black text-primary">{profile.points_balance?.toLocaleString()}</p>
+            <p className="text-xs text-primary/70 font-semibold uppercase tracking-wider">Total SOL Won</p>
+            <p className="text-3xl font-black text-primary">{(profile.total_sol_won || 0).toFixed(4)}</p>
           </div>
           <div className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-primary/60" />
@@ -118,7 +118,7 @@ export default function Profile() {
       <div className="grid grid-cols-2 gap-3 mb-6">
         <StatCard label="Workouts" value={profile.total_workouts} icon={Dumbbell} />
         <StatCard label="Win Rate" value={`${winRate}%`} icon={Trophy} />
-        <StatCard label="Points Won" value={profile.total_points_won?.toLocaleString()} icon={Coins} accent />
+        <StatCard label="SOL Staked" value={(profile.total_sol_staked || 0).toFixed(2)} icon={TrendingUp} accent />
         <StatCard label="Best Streak" value={`${profile.longest_streak}d`} icon={Flame} />
       </div>
 
@@ -137,7 +137,7 @@ export default function Profile() {
                   <TierBadge tier={entry.tier} />
                   <span className="text-sm font-semibold">{entry.checkins_completed}/{entry.checkins_required}</span>
                 </div>
-                <span className="text-sm font-bold text-primary">{entry.stake_amount} pts</span>
+                <span className="text-sm font-bold text-primary">{(entry.sol_stake_amount || 0).toFixed(2)} SOL</span>
               </div>
             ))}
           </div>

@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
-import TierBadge from '@/components/shared/TierBadge';
-import { Trophy, Flame, Coins, Medal } from 'lucide-react';
+import { Trophy, Flame, TrendingUp, Medal } from 'lucide-react';
 
 const tabs = [
   { key: 'weekly', label: 'Weekly', icon: Flame },
   { key: 'challenge', label: 'Challenge', icon: Trophy },
-  { key: 'alltime', label: 'All Time', icon: Coins },
+  { key: 'alltime', label: 'All Time', icon: TrendingUp },
 ];
 
 const filterOptions = [
@@ -28,7 +27,7 @@ export default function Leaderboard() {
       setLoading(true);
       try {
         let sortField = '-total_workouts';
-        if (tab === 'alltime') sortField = '-total_points_won';
+        if (tab === 'alltime') sortField = '-total_sol_won';
         const data = await base44.entities.UserProfile.list(sortField, 50);
         setProfiles(data);
       } catch (err) {
@@ -85,7 +84,7 @@ export default function Leaderboard() {
         <div className="space-y-2">
           {profiles.map((p, idx) => {
             const isMe = p.user_id === profile?.user_id;
-            const value = tab === 'alltime' ? `${p.total_points_won?.toLocaleString()} pts` : `${p.total_workouts} workouts`;
+            const value = tab === 'alltime' ? `${(p.total_sol_won || 0).toFixed(2)} SOL` : `${p.total_workouts} workouts`;
             return (
               <div
                 key={p.id}

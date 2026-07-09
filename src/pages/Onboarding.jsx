@@ -51,7 +51,6 @@ export default function Onboarding() {
         photo_url,
         fitness_level: fitnessLevel,
         primary_goal: primaryGoal,
-        points_balance: 500,
         onboarding_complete: true,
       });
       window.location.href = '/';

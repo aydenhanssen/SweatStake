@@ -5,11 +5,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { TIERS } from '@/lib/constants';
 import TierBadge from '@/components/shared/TierBadge';
 import StatCard from '@/components/shared/StatCard';
-import { Flame, Trophy, Coins, Dumbbell, Clock, Zap, ChevronRight, Plus, Bell, Users, Shield } from 'lucide-react';
+import { Flame, Trophy, TrendingUp, Dumbbell, Clock, Plus, Bell, Users, Shield } from 'lucide-react';
 import { isAdmin } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import PhantomWalletButton from '@/components/wallet/PhantomWalletButton';
+import { usePhantomWallet } from '@/lib/phantomWallet';
 
 export default function Home() {
   const { profile, loading, user } = useProfile();
@@ -18,6 +19,7 @@ export default function Home() {
   const [loadingChallenge, setLoadingChallenge] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+  const { connected, balance } = usePhantomWallet();
 
   useEffect(() => {
     if (!loading && !profile) {
@@ -102,15 +104,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Points Balance */}
+      {/* SOL Balance */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 rounded-3xl p-6 mb-6"
       >
-        <p className="text-xs text-primary/70 font-semibold uppercase tracking-widest">Your Balance</p>
-        <p className="text-5xl font-black text-primary mt-1">{profile.points_balance?.toLocaleString()}</p>
-        <p className="text-sm text-muted-foreground mt-1">virtual points</p>
+        <p className="text-xs text-primary/70 font-semibold uppercase tracking-widest">Your SOL Balance</p>
+        <p className="text-5xl font-black text-primary mt-1">
+          {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
+        </p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {connected ? 'SOL' : 'Connect wallet to view balance'}
+        </p>
       </motion.div>
 
       {/* Active Challenge */}
@@ -151,11 +157,11 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-secondary/50 rounded-2xl p-3 text-center">
               <p className="text-xs text-muted-foreground">Your Stake</p>
-              <p className="text-lg font-black text-foreground">{activeEntry.stake_amount}</p>
+              <p className="text-lg font-black text-foreground">{(activeEntry.sol_stake_amount || 0).toFixed(2)} SOL</p>
             </div>
             <div className="bg-secondary/50 rounded-2xl p-3 text-center">
               <p className="text-xs text-muted-foreground">Total Pot</p>
-              <p className="text-lg font-black text-primary">{challenge.total_pot?.toLocaleString()}</p>
+              <p className="text-lg font-black text-primary">{(challenge.sol_total_pot || 0).toFixed(2)} SOL</p>
             </div>
           </div>
 
@@ -174,7 +180,7 @@ export default function Home() {
         >
           <Dumbbell className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <h3 className="font-bold text-foreground mb-1">No Active Challenge</h3>
-          <p className="text-sm text-muted-foreground mb-4">Create or join a challenge and put your points on the line</p>
+          <p className="text-sm text-muted-foreground mb-4">Create or join a challenge and put your SOL on the line</p>
           <div className="flex flex-col gap-2">
             <Link to="/create-challenge">
               <Button className="w-full font-bold rounded-2xl">
@@ -215,7 +221,7 @@ export default function Home() {
         className="grid grid-cols-3 gap-3"
       >
         <StatCard label="Workouts" value={profile.total_workouts} icon={Dumbbell} />
-        <StatCard label="Won" value={profile.total_points_won?.toLocaleString()} icon={Coins} accent />
+        <StatCard label="SOL Won" value={(profile.total_sol_won || 0).toFixed(2)} icon={TrendingUp} accent />
         <StatCard label="Win Rate" value={`${winRate}%`} icon={Trophy} />
       </motion.div>
     </div>

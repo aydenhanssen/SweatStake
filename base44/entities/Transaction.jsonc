@@ -10,11 +10,7 @@
       "enum": [
         "stake",
         "win",
-        "loss",
-        "daily_bonus",
-        "purchase",
-        "refund",
-        "signup_bonus"
+        "loss"
       ]
     },
     "amount": {
@@ -23,8 +19,8 @@
     "description": {
       "type": "string"
     },
-    "balance_after": {
-      "type": "number"
+    "tx_signature": {
+      "type": "string"
     }
   },
   "required": [

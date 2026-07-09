@@ -23,12 +23,12 @@ export default function PayoutModal({ open, amount, onClose }) {
             <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 border-2 border-primary/40 flex items-center justify-center mb-3">
               <Gift className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-lg font-black text-foreground">Payout Sent!</h3>
+            <h3 className="text-lg font-black text-foreground">Goal Complete!</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {amount} SOL has been sent to your Phantom wallet for completing your goal.
+              You can now claim {amount?.toFixed(4)} SOL — your stake back plus your share of the pot.
             </p>
             <Button onClick={onClose} className="w-full mt-5 font-bold rounded-2xl">
-              Done
+              Claim SOL
             </Button>
           </motion.div>
         </motion.div>

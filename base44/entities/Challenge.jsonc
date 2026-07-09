@@ -28,7 +28,7 @@
       ],
       "default": "upcoming"
     },
-    "total_pot": {
+    "sol_total_pot": {
       "type": "number",
       "default": 0
     },

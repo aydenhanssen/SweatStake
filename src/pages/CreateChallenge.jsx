@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
-import { TIERS, PLATFORM_FEE } from '@/lib/constants';
+import { TIERS, PLATFORM_FEE, MIN_SOL_STAKE } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Users, Coins, Lock, Crown, Globe, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Lock, Crown, Globe, Check, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
@@ -24,7 +24,6 @@ export default function CreateChallenge() {
   const [name, setName] = useState('');
   const [selectedTier, setSelectedTier] = useState('bronze');
   const [duration, setDuration] = useState('1w');
-  const [stakeAmount, setStakeAmount] = useState(50);
   const [isPublic, setIsPublic] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -37,41 +36,24 @@ export default function CreateChallenge() {
   const tier = TIERS[selectedTier];
   const dur = DURATIONS.find(d => d.key === duration);
 
-  const handleStakeChange = (e) => {
-    let val = parseInt(e.target.value, 10);
-    if (isNaN(val)) val = 0;
-    val = Math.min(val, tier.maxStake);
-    val = Math.max(0, val);
-    setStakeAmount(val);
-  };
-
   const handleSubmit = async () => {
     if (!name.trim()) {
       toast({ title: 'Name required', description: 'Give your challenge a name.', variant: 'destructive' });
       return;
     }
-    if (stakeAmount < 10) {
-      toast({ title: 'Stake too low', description: 'Minimum stake is 10 points.', variant: 'destructive' });
+    if (solStakeAmount < MIN_SOL_STAKE) {
+      toast({ title: 'Stake too low', description: `Minimum stake is ${MIN_SOL_STAKE} SOL.`, variant: 'destructive' });
       return;
     }
-    if (stakeAmount > profile.points_balance) {
-      toast({ title: 'Insufficient points', description: "You don't have enough points for this stake.", variant: 'destructive' });
+    if (solStakeAmount > tier.maxSolStake) {
+      toast({ title: 'Stake too high', description: `Maximum stake for ${tier.label} is ${tier.maxSolStake} SOL.`, variant: 'destructive' });
       return;
     }
     if (!walletConnected) {
       toast({ title: 'Wallet required', description: 'Connect your Phantom wallet to create a challenge.', variant: 'destructive' });
       return;
     }
-    if (solStakeAmount <= 0) {
-      toast({ title: 'SOL stake required', description: 'Enter a SOL amount to stake.', variant: 'destructive' });
-      return;
-    }
-
-    if (solStakeAmount > 0) {
-      setShowSolModal(true);
-      return;
-    }
-    await createChallenge(null, 0);
+    setShowSolModal(true);
   };
 
   const handleSolSuccess = async (txSig, solAmount) => {
@@ -91,7 +73,7 @@ export default function CreateChallenge() {
         week_start: weekStart.toISOString().split('T')[0],
         week_end: weekEnd.toISOString().split('T')[0],
         status: 'active',
-        total_pot: stakeAmount,
+        sol_total_pot: solAmount,
         participant_count: 1,
       });
 
@@ -100,17 +82,24 @@ export default function CreateChallenge() {
         user_id: profile.user_id,
         username: profile.username,
         tier: selectedTier,
-        stake_amount: stakeAmount,
+        sol_stake_amount: solAmount,
+        sol_tx_signature: solTxSig,
         checkins_required: tier.workouts,
         checkins_completed: 0,
         status: 'active',
-        sol_stake_amount: solAmount,
-        sol_tx_signature: solTxSig,
       });
 
       await base44.entities.UserProfile.update(profile.id, {
-        points_balance: profile.points_balance - stakeAmount,
+        total_sol_staked: (profile.total_sol_staked || 0) + solAmount,
         wallet_address: walletAddress,
+      });
+
+      await base44.entities.Transaction.create({
+        user_id: profile.user_id,
+        type: 'stake',
+        amount: solAmount,
+        description: `Staked on ${tier.label} challenge`,
+        tx_signature: solTxSig,
       });
 
       await refetch();
@@ -144,7 +133,7 @@ export default function CreateChallenge() {
         </motion.div>
         <div>
           <h2 className="text-2xl font-black text-foreground">Challenge Created!</h2>
-          <p className="text-muted-foreground mt-2">You staked {stakeAmount} points. Time to sweat.</p>
+          <p className="text-muted-foreground mt-2">You staked {solStakeAmount} SOL. Time to sweat.</p>
         </div>
         <Button onClick={() => navigate('/')} className="font-bold rounded-2xl px-8">
           Back to Dashboard
@@ -204,10 +193,7 @@ export default function CreateChallenge() {
                 )}
                 <p className={`font-black text-base ${t.color}`}>{t.label}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t.workouts}x / week</p>
-                <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                  <Coins className="w-3 h-3" />
-                  <span>Max {t.maxStake.toLocaleString()}</span>
-                </div>
+                <p className="text-xs text-muted-foreground mt-2">Up to {t.maxSolStake} SOL</p>
                 {isLocked && (
                   <div className="flex items-center gap-1 mt-2 text-xs text-primary">
                     <Crown className="w-3 h-3" />
@@ -241,26 +227,6 @@ export default function CreateChallenge() {
         </div>
       </div>
 
-      {/* Stake Amount */}
-      <div className="mb-5">
-        <label className="text-sm font-bold text-foreground mb-2 block">Stake Amount</label>
-        <div className="relative">
-          <Input
-            type="number"
-            value={stakeAmount}
-            onChange={handleStakeChange}
-            min={0}
-            max={tier.maxStake}
-            className="bg-card border-border rounded-2xl h-12 pr-16 text-lg font-bold"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">pts</span>
-        </div>
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-xs text-muted-foreground">Max for {tier.label}: {tier.maxStake.toLocaleString()} pts</span>
-          <span className="text-xs text-muted-foreground">Balance: {profile.points_balance?.toLocaleString()} pts</span>
-        </div>
-      </div>
-
       {/* SOL Stake Amount */}
       <div className="mb-5">
         <label className="text-sm font-bold text-foreground mb-2 block">Stake SOL (via Phantom)</label>
@@ -270,10 +236,15 @@ export default function CreateChallenge() {
             value={solStakeAmount}
             onChange={(e) => setSolStakeAmount(parseFloat(e.target.value) || 0)}
             step="0.01"
-            min="0.01"
+            min={MIN_SOL_STAKE}
+            max={tier.maxSolStake}
             className="bg-card border-border rounded-2xl h-12 pr-16 text-lg font-bold"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#AB9FF2]">SOL</span>
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-xs text-muted-foreground">Min: {MIN_SOL_STAKE} SOL</span>
+          <span className="text-xs text-muted-foreground">Max for {tier.label}: {tier.maxSolStake} SOL</span>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
           {walletConnected
@@ -313,7 +284,7 @@ export default function CreateChallenge() {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Your stake</span>
-          <span className="font-bold text-primary">{stakeAmount} pts</span>
+          <span className="font-bold text-primary">{solStakeAmount} SOL</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Platform fee on loss</span>
@@ -324,7 +295,7 @@ export default function CreateChallenge() {
       {/* Submit */}
       <Button
         onClick={handleSubmit}
-        disabled={submitting || !name.trim() || stakeAmount < 10 || !walletConnected}
+        disabled={submitting || !name.trim() || solStakeAmount < MIN_SOL_STAKE || !walletConnected}
         className="w-full h-14 text-lg font-black rounded-2xl"
       >
         {submitting ? (
@@ -332,7 +303,7 @@ export default function CreateChallenge() {
             <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Creating...
           </>
         ) : (
-          <>Confirm & Stake</>
+          <>Confirm & Stake {solStakeAmount} SOL</>
         )}
       </Button>
       {!walletConnected && (

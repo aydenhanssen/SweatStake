@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
-import { TIERS } from '@/lib/constants';
+import { TIERS, MIN_SOL_STAKE } from '@/lib/constants';
 import TierBadge from '@/components/shared/TierBadge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, Coins, Lock, Crown } from 'lucide-react';
+import { ArrowLeft, Users, Lock, Crown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import PhantomWalletButton from '@/components/wallet/PhantomWalletButton';
@@ -18,7 +17,6 @@ export default function Challenges() {
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTier, setSelectedTier] = useState(null);
-  const [stakeAmount, setStakeAmount] = useState(50);
   const [solStakeAmount, setSolStakeAmount] = useState(0.1);
   const [joining, setJoining] = useState(false);
   const [showSolModal, setShowSolModal] = useState(false);
@@ -44,16 +42,16 @@ export default function Challenges() {
   const handleJoin = async (challenge) => {
     if (!profile) return;
     const tier = TIERS[challenge.tier];
-    if (stakeAmount > profile.points_balance) {
-      toast({ title: 'Insufficient points', description: "You don't have enough points for this stake.", variant: 'destructive' });
-      return;
-    }
     if (!walletConnected) {
       toast({ title: 'Wallet required', description: 'Connect your Phantom wallet to join.', variant: 'destructive' });
       return;
     }
-    if (solStakeAmount <= 0) {
-      toast({ title: 'SOL stake required', description: 'Enter a SOL amount to stake.', variant: 'destructive' });
+    if (solStakeAmount < MIN_SOL_STAKE) {
+      toast({ title: 'Stake too low', description: `Minimum stake is ${MIN_SOL_STAKE} SOL.`, variant: 'destructive' });
+      return;
+    }
+    if (solStakeAmount > tier.maxSolStake) {
+      toast({ title: 'Stake too high', description: `Maximum stake for ${tier.label} is ${tier.maxSolStake} SOL.`, variant: 'destructive' });
       return;
     }
     setPendingChallenge(challenge);
@@ -71,20 +69,26 @@ export default function Challenges() {
         user_id: profile.user_id,
         username: profile.username,
         tier: challenge.tier,
-        stake_amount: stakeAmount,
-        checkins_required: tier.workouts,
         sol_stake_amount: solAmount,
         sol_tx_signature: txSig,
+        checkins_required: tier.workouts,
       });
       await base44.entities.Challenge.update(challenge.id, {
-        total_pot: challenge.total_pot + stakeAmount,
+        sol_total_pot: (challenge.sol_total_pot || 0) + solAmount,
         participant_count: challenge.participant_count + 1,
       });
       await base44.entities.UserProfile.update(profile.id, {
-        points_balance: profile.points_balance - stakeAmount,
+        total_sol_staked: (profile.total_sol_staked || 0) + solAmount,
         wallet_address: walletAddress,
       });
-      toast({ title: 'You\'re in! 🔥', description: `Staked ${stakeAmount} points + ${solAmount} SOL on the ${tier.label} challenge.` });
+      await base44.entities.Transaction.create({
+        user_id: profile.user_id,
+        type: 'stake',
+        amount: solAmount,
+        description: `Staked on ${tier.label} challenge`,
+        tx_signature: txSig,
+      });
+      toast({ title: 'You\'re in! 🔥', description: `Staked ${solAmount} SOL on the ${tier.label} challenge.` });
       navigate('/');
     } catch (err) {
       toast({ title: 'Error', description: 'Could not join challenge.', variant: 'destructive' });
@@ -146,8 +150,7 @@ export default function Challenges() {
 
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1 text-muted-foreground">
-                  <Coins className="w-3.5 h-3.5" />
-                  <span>Up to {tier.maxStake.toLocaleString()} pts</span>
+                  <span>Up to {tier.maxSolStake} SOL</span>
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Users className="w-3.5 h-3.5" />
@@ -164,17 +167,6 @@ export default function Challenges() {
 
               {isSelected && ch && (
                 <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Points stake: <span className="font-bold text-foreground">{stakeAmount} pts</span>
-                  </p>
-                  <Slider
-                    value={[stakeAmount]}
-                    onValueChange={(v) => setStakeAmount(v[0])}
-                    min={10}
-                    max={Math.min(tier.maxStake, profile.points_balance)}
-                    step={10}
-                    className="mb-4"
-                  />
                   <div className="mb-4">
                     <label className="text-sm font-bold text-foreground mb-2 block">SOL Stake</label>
                     <Input
@@ -182,19 +174,21 @@ export default function Challenges() {
                       value={solStakeAmount}
                       onChange={(e) => setSolStakeAmount(parseFloat(e.target.value) || 0)}
                       step="0.01"
-                      min="0.01"
+                      min={MIN_SOL_STAKE}
+                      max={tier.maxSolStake}
                       className="bg-secondary border-border rounded-2xl h-11 font-bold"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">Min {MIN_SOL_STAKE} SOL · Max {tier.maxSolStake} SOL</p>
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Current pot: <span className="font-semibold text-primary">{ch.total_pot?.toLocaleString()} pts</span>
+                    Current pot: <span className="font-semibold text-primary">{(ch.sol_total_pot || 0).toFixed(2)} SOL</span>
                   </p>
                   <Button
                     onClick={() => handleJoin(ch)}
                     disabled={joining || !walletConnected}
                     className="w-full h-12 font-black rounded-2xl text-base"
                   >
-                    {joining ? 'Joining...' : `Stake ${stakeAmount} pts + ${solStakeAmount} SOL`}
+                    {joining ? 'Joining...' : `Stake ${solStakeAmount} SOL`}
                   </Button>
                   {!walletConnected && (
                     <p className="text-xs text-destructive text-center mt-2 font-semibold">Connect Phantom to join</p>

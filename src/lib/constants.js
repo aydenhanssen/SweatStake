@@ -1,9 +1,11 @@
 export const TIERS = {
-  bronze: { label: 'Bronze', workouts: 3, maxStake: 100, color: 'text-amber-600', bg: 'bg-amber-600/10', border: 'border-amber-600/30' },
-  silver: { label: 'Silver', workouts: 4, maxStake: 500, color: 'text-slate-300', bg: 'bg-slate-300/10', border: 'border-slate-300/30' },
-  gold: { label: 'Gold', workouts: 5, maxStake: 2000, color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/30' },
-  elite: { label: 'Elite', workouts: 6, maxStake: 5000, color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/30' },
+  bronze: { label: 'Bronze', workouts: 3, maxSolStake: 0.5, color: 'text-amber-600', bg: 'bg-amber-600/10', border: 'border-amber-600/30' },
+  silver: { label: 'Silver', workouts: 4, maxSolStake: 2, color: 'text-slate-300', bg: 'bg-slate-300/10', border: 'border-slate-300/30' },
+  gold: { label: 'Gold', workouts: 5, maxSolStake: 5, color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/30' },
+  elite: { label: 'Elite', workouts: 6, maxSolStake: 20, color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/30' },
 };
+
+export const MIN_SOL_STAKE = 0.05;
 
 export const WORKOUT_TYPES = {
   push: { label: 'Push', icon: 'ArrowUp' },

@@ -20,8 +20,16 @@
         "elite"
       ]
     },
-    "stake_amount": {
-      "type": "number"
+    "sol_stake_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "sol_tx_signature": {
+      "type": "string"
+    },
+    "sol_payout": {
+      "type": "number",
+      "default": 0
     },
     "checkins_completed": {
       "type": "number",
@@ -38,27 +46,12 @@
         "lost"
       ],
       "default": "active"
-    },
-    "points_won": {
-      "type": "number",
-      "default": 0
-    },
-    "points_lost": {
-      "type": "number",
-      "default": 0
-    },
-    "sol_stake_amount": {
-      "type": "number",
-      "default": 0
-    },
-    "sol_tx_signature": {
-      "type": "string"
     }
   },
   "required": [
     "challenge_id",
     "user_id",
-    "stake_amount",
+    "sol_stake_amount",
     "checkins_required"
   ]
 }
