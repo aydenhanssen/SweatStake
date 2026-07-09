@@ -72,7 +72,7 @@ export default function Home() {
     <div className="max-w-lg mx-auto px-6 pt-8 pb-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-12 gap-3">
-        <h1 className="text-base sm:text-lg font-black font-heading tracking-[0.15em] text-gradient-gold flex-shrink-0">SWEATSTAKE</h1>
+        <h1 className="text-lg sm:text-xl font-black font-heading tracking-[0.15em] text-gradient-gold flex-shrink-0">SWEATSTAKE</h1>
         <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
           <PhantomWalletButton compact={false} />
           {isAdmin(user?.email) && (
