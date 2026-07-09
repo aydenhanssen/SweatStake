@@ -13,8 +13,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon, Trophy, Users } from "lucide-react";
-import { useBase44 } from "@base44/sdk";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { base44 } from "@/api/base44Client";
+import { usePhantomWallet } from "@/lib/phantomWallet";
 import { useSolanaStake } from "@/hooks/useSolanaStake";
 import toast from "react-hot-toast";
 
@@ -29,8 +29,7 @@ const formSchema = z.object({
 });
 
 export default function CreateChallenge() {
-  const { createEntity } = useBase44();
-  const wallet = useWallet();
+  const { connected, address } = usePhantomWallet();
   const { stakeOnChallenge } = useSolanaStake();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -55,7 +54,7 @@ export default function CreateChallenge() {
   const totalPot = (stakeAmount * estimatedParticipants * 0.95).toFixed(2);
 
   const onSubmit = async (data) => {
-    if (!wallet.connected) {
+    if (!connected) {
       toast.error("Please connect your Phantom wallet first");
       return;
     }
@@ -65,7 +64,7 @@ export default function CreateChallenge() {
 
     try {
       // 1. Create challenge record in Base44
-      const challenge = await createEntity("Challenge", {
+      const challenge = await base44.entities.Challenge.create({
         title: data.title,
         description: data.description,
         durationDays: data.durationDays,
@@ -73,11 +72,11 @@ export default function CreateChallenge() {
         stakeAmount: data.stakeAmount,
         frequency: data.frequency,
         isPublic: data.isPublic,
-        creator: wallet.publicKey.toString(),
+        creator: address,
         status: "active",
         proofRequirement: "camera-only",
-        totalStaked: 0,
-        participants: [],
+        sol_total_pot: 0,
+        participant_count: 0,
       });
 
       toast.loading("Staking SOL on Solana...", { id: toastId });
@@ -219,7 +218,7 @@ export default function CreateChallenge() {
               type="submit"
               size="lg"
               className="w-full text-lg py-7 font-semibold"
-              disabled={isCreating || !wallet.connected}
+              disabled={isCreating || !connected}
             >
               {isCreating 
                 ? "Creating + Staking on Solana..." 
