@@ -11,13 +11,15 @@ const navItems = [
 
 export default function AppLayout() {
   const location = useLocation();
+  const isCheckinFlow = location.pathname === '/checkin';
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="flex-1 pb-20 overflow-y-auto">
+      <div className={`flex-1 overflow-y-auto ${isCheckinFlow ? 'pb-4' : 'pb-20'}`}>
         <Outlet />
       </div>
-      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border z-50">
+      {!isCheckinFlow && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border z-50">
         <div className="max-w-lg mx-auto flex items-center justify-around py-2 px-2">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
@@ -47,6 +49,7 @@ export default function AppLayout() {
           })}
         </div>
       </nav>
+      )}
     </div>
   );
 }
