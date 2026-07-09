@@ -5,9 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Trophy, Users, Clock, Calendar } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import TierBadge from '@/components/shared/TierBadge';
+import PageHeader from '@/components/shared/PageHeader';
 
 export default function Challenges() {
   const [challenges, setChallenges] = useState([]);
@@ -49,21 +50,15 @@ export default function Challenges() {
   return (
     <div className="max-w-2xl mx-auto px-5 pt-8 pb-8">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
-          <Trophy className="w-4 h-4 text-primary" />
-        </Link>
-        <h1 className="text-xl font-black font-heading text-gradient-gold">Challenges</h1>
-        <div className="ml-auto">
-          <Button
-            onClick={() => navigate('/create-challenge')}
-            className="font-bold font-heading rounded-xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 shadow-lg shadow-primary/30"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Create
-          </Button>
-        </div>
-      </div>
+      <PageHeader title="Challenges">
+        <Button
+          onClick={() => navigate('/create-challenge')}
+          className="font-bold font-heading rounded-xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 shadow-lg shadow-primary/30"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Create
+        </Button>
+      </PageHeader>
 
       {/* Search */}
       <div className="relative mb-4">

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Clock, Wallet } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 import toast from "react-hot-toast";
 
 export default function ChallengeDetail() {
@@ -64,6 +65,7 @@ export default function ChallengeDetail() {
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
+      <PageHeader title="Challenge Details" backTo="/challenges" />
       <Card>
         <CardHeader>
           <div className="flex justify-between items-start">
