@@ -22,12 +22,12 @@ export default function PhantomWalletButton({ compact = false }) {
       <button
         onClick={handleConnect}
         disabled={connecting}
-        className="flex items-center gap-1 bg-[#AB9FF2] hover:bg-[#AB9FF2]/90 text-white font-bold rounded-md px-2 py-1 text-[11px] transition-colors disabled:opacity-50"
+        className="flex items-center gap-0.5 bg-[#AB9FF2] hover:bg-[#AB9FF2]/90 text-white font-bold rounded-md px-1.5 py-0.5 text-[9px] transition-colors disabled:opacity-50"
       >
         {connecting ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+          <svg viewBox="0 0 24 24" className="w-3 h-3 fill-current">
             <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.3L19.5 8 12 11.7 4.5 8 12 4.3z"/>
           </svg>
         )}
