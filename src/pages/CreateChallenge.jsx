@@ -15,26 +15,15 @@ import { useSolanaStake } from "@/hooks/useSolanaStake";
 export default function CreateChallenge() {
   const navigate = useNavigate();
   const wallet = usePhantomWallet();
-  const { stakeOnChallenge } = useSolanaStake();
+  const { stakeOnChallenge, loading: staking } = useSolanaStake();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [stakeAmount, setStakeAmount] = useState("0.5");
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreate = async () => {
-    console.log("CreateChallenge: handleCreate fired", { title, description, stakeAmount });
-
-    if (!title.trim()) {
-      toast.error("Please enter a challenge title");
-      return;
-    }
-
-    const amount = parseFloat(stakeAmount);
-    if (!amount || amount <= 0) {
-      toast.error("Please enter a valid stake amount");
-      return;
-    }
+  const onSubmit = async (data) => {
+    console.log("CreateChallenge: onSubmit fired", data);
 
     if (!wallet.connected) {
       toast.error("Connect your Phantom wallet first");
@@ -45,12 +34,12 @@ export default function CreateChallenge() {
     const toastId = toast.loading("Creating challenge...");
 
     try {
-      // 1. Create the Challenge entity in Base44
+      // 1. Create the Challenge in Base44
       console.log("CreateChallenge: creating entity in Base44...");
       const challenge = await base44.entities.Challenge.create({
-        title: title.trim(),
-        description: description.trim(),
-        stake_amount: amount,
+        title: data.title,
+        description: data.description || "",
+        stake_amount: data.stakeAmount,
         tier: "bronze",
         status: "active",
         is_public: true,
@@ -67,20 +56,20 @@ export default function CreateChallenge() {
 
       console.log("CreateChallenge: entity created", challenge);
 
-      toast.loading("Staking SOL...", { id: toastId });
+      // 2. Call stakeOnChallenge — this opens the Phantom popup
+      toast.loading("Opening Phantom to stake...", { id: toastId });
+      console.log("CreateChallenge: calling stakeOnChallenge", { challengeId: challenge.id, amount: data.stakeAmount });
 
-      // 2. Call stakeOnChallenge from the hook
-      console.log("CreateChallenge: staking SOL...", { challengeId: challenge.id, amount });
-      const stakeResult = await stakeOnChallenge({
+      const result = await stakeOnChallenge({
         challengeId: challenge.id,
-        amountInSOL: amount,
+        amountInSOL: data.stakeAmount,
       });
 
-      console.log("CreateChallenge: stake result", stakeResult);
+      console.log("CreateChallenge: stake result", result);
 
       toast.success("Challenge created and SOL staked!", { id: toastId });
 
-      // 3. Navigate to the new challenge detail page
+      // 3. Navigate to the challenge detail page
       navigate(`/challenge/${challenge.id}`);
     } catch (error) {
       console.error("CreateChallenge: error", error);
@@ -89,6 +78,21 @@ export default function CreateChallenge() {
       setIsCreating(false);
     }
   };
+
+  const handleSubmit = () => {
+    const amount = parseFloat(stakeAmount);
+    if (!title.trim()) {
+      toast.error("Please enter a challenge title");
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast.error("Please enter a valid stake amount");
+      return;
+    }
+    onSubmit({ title: title.trim(), description: description.trim(), stakeAmount: amount });
+  };
+
+  const isProcessing = isCreating || staking;
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
@@ -159,11 +163,11 @@ export default function CreateChallenge() {
           </div>
 
           <Button
-            onClick={handleCreate}
+            onClick={handleSubmit}
             className="w-full py-7 text-lg font-bold font-heading rounded-2xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 shadow-lg shadow-primary/30"
-            disabled={isCreating}
+            disabled={isProcessing}
           >
-            {isCreating ? "Processing..." : `Stake ${stakeAmount} SOL & Create Challenge`}
+            {isProcessing ? "Processing..." : `Stake ${stakeAmount} SOL & Create Challenge`}
           </Button>
         </CardContent>
       </Card>
