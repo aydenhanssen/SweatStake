@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 
 const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
+const SOLANA_RPC_FALLBACK = 'https://solana-mainnet.g.alchemy.com/v2/demo';
 // Replace with your real treasury wallet address
 const TREASURY_WALLET = '5ZWjBo9ooooYoeZzB2ko3C7aQ4mrqgFAj1mh3w7hqLxJ';
 
@@ -11,8 +12,10 @@ export function PhantomWalletProvider({ children }) {
   const [connected, setConnected] = useState(false);
   const [address, setAddress] = useState(null);
   const [balance, setBalance] = useState(null);
+  const [balanceError, setBalanceError] = useState(null);
   const [connecting, setConnecting] = useState(false);
   const [connection] = useState(() => new Connection(SOLANA_RPC, 'confirmed'));
+  const [fallbackConnection] = useState(() => new Connection(SOLANA_RPC_FALLBACK, 'confirmed'));
 
   const shortenAddress = (addr) => {
     if (!addr) return '';
@@ -21,13 +24,21 @@ export function PhantomWalletProvider({ children }) {
 
   const refreshBalance = useCallback(async (pubkey) => {
     if (!pubkey) return;
-    try {
-      const bal = await connection.getBalance(new PublicKey(pubkey));
-      setBalance(bal / LAMPORTS_PER_SOL);
-    } catch {
-      setBalance(null);
+    setBalanceError(null);
+    const pk = new PublicKey(pubkey);
+    // Try primary RPC, then fallback if rate-limited
+    for (const conn of [connection, fallbackConnection]) {
+      try {
+        const bal = await conn.getBalance(pk);
+        setBalance(bal / LAMPORTS_PER_SOL);
+        return;
+      } catch (err) {
+        // try next RPC
+      }
     }
-  }, [connection]);
+    setBalance(null);
+    setBalanceError('Unable to fetch SOL balance. The Solana RPC may be rate-limited — try refreshing.');
+  }, [connection, fallbackConnection]);
 
   useEffect(() => {
     const provider = window.solana;
@@ -124,6 +135,7 @@ export function PhantomWalletProvider({ children }) {
     address,
     shortenedAddress: shortenAddress(address),
     balance,
+    balanceError,
     connecting,
     connect,
     disconnect,

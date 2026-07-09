@@ -4,7 +4,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Loader2, RefreshCw, Check, Copy } from 'lucide-react';
 
 export default function PhantomWalletButton({ compact = false }) {
-  const { connected, address, shortenedAddress, balance, connecting, connect, disconnect, refreshBalance } = usePhantomWallet();
+  const { connected, address, shortenedAddress, balance, balanceError, connecting, connect, disconnect, refreshBalance } = usePhantomWallet();
   const { toast } = useToast();
   const [showMenu, setShowMenu] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -99,10 +99,12 @@ export default function PhantomWalletButton({ compact = false }) {
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Balance</span>
                 <div className="flex items-center gap-1.5">
-                  {balance !== null ? (
+                  {balanceError ? (
+                    <span className="text-xs font-bold text-destructive">Error</span>
+                  ) : balance !== null ? (
                     <span className="text-xs font-bold text-gradient-gold">{balance.toFixed(4)} SOL</span>
                   ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
+                    <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
                   )}
                   <span
                     onClick={handleRefresh}
@@ -113,6 +115,9 @@ export default function PhantomWalletButton({ compact = false }) {
                   </span>
                 </div>
               </div>
+              {balanceError && (
+                <p className="text-[10px] text-destructive/80 leading-relaxed">{balanceError}</p>
+              )}
             </div>
             <button
               onClick={() => { disconnect(); setShowMenu(false); }}
