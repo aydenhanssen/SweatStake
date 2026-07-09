@@ -69,33 +69,31 @@ export default function Home() {
     : 0;
 
   return (
-    <div className="max-w-lg mx-auto px-4 pt-6 pb-4">
+    <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-black text-primary tracking-tight">SWEATSTAKE</h1>
-        </div>
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-xl font-black text-primary tracking-tight">SWEATSTAKE</h1>
+        <div className="flex items-center gap-2">
           <PhantomWalletButton />
           {isAdmin(user?.email) && (
-            <Link to="/admin" className="p-2">
+            <Link to="/admin" className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-card transition-colors">
               <Shield className="w-5 h-5 text-primary" />
             </Link>
           )}
-          <Link to="/notifications" className="relative p-2">
+          <Link to="/notifications" className="relative w-10 h-10 flex items-center justify-center rounded-xl hover:bg-card transition-colors">
             <Bell className="w-5 h-5 text-muted-foreground" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white">
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white">
                 {unreadCount}
               </span>
             )}
           </Link>
           <Link to="/profile">
-            <div className="w-9 h-9 rounded-full bg-secondary overflow-hidden border border-border">
+            <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden border border-border ml-1">
               {profile.photo_url ? (
                 <img src={profile.photo_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-bold">
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm font-bold">
                   {profile.username?.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -108,13 +106,13 @@ export default function Home() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 rounded-3xl p-6 mb-6"
+        className="bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 rounded-3xl p-8 mb-8"
       >
         <p className="text-xs text-primary/70 font-semibold uppercase tracking-widest">Your SOL Balance</p>
-        <p className="text-5xl font-black text-primary mt-1">
+        <p className="text-5xl font-black text-primary mt-2">
           {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
         </p>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-2">
           {connected ? 'SOL' : 'Connect wallet to view balance'}
         </p>
       </motion.div>
@@ -125,9 +123,9 @@ export default function Home() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-card border border-border rounded-3xl p-5 mb-4"
+          className="bg-card border border-border rounded-3xl p-6 mb-6"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-foreground">Active Challenge</h3>
               <TierBadge tier={activeEntry.tier} />
