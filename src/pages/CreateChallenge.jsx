@@ -53,6 +53,7 @@ export default function CreateChallenge() {
     const toastId = toast.loading("Creating challenge...");
 
     try {
+      console.log("Staking started");
       const challenge = await base44.entities.Challenge.create({
         title: title.trim(),
         description: description.trim(),
@@ -70,6 +71,7 @@ export default function CreateChallenge() {
         amountInSOL: stakeAmount,
       });
 
+      console.log("Challenge created", challenge);
       toast.success(`Challenge created & ${stakeAmount} SOL staked!`, { id: toastId });
       navigate(`/challenge/${challenge.id}`);
     } catch (error) {
