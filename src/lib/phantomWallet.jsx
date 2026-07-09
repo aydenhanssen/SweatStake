@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 
-const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
-const SOLANA_RPC_FALLBACK = 'https://solana-mainnet.g.alchemy.com/v2/demo';
+const SOLANA_RPC = 'https://mainnet.helius-rpc.com/?api-key=8c4d2e91-9c3f-4f3e-8b1a-2e1a3c4d5e6f';
+const SOLANA_RPC_FALLBACK = 'https://rpc.ankr.com/solana';
 // Replace with your real treasury wallet address
 const TREASURY_WALLET = '5ZWjBo9ooooYoeZzB2ko3C7aQ4mrqgFAj1mh3w7hqLxJ';
 
@@ -22,23 +22,34 @@ export function PhantomWalletProvider({ children }) {
     return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
   };
 
+  const fetchBalanceWithRetry = useCallback(async (pk, attempts = 3) => {
+    for (let i = 0; i < attempts; i++) {
+      for (const conn of [connection, fallbackConnection]) {
+        try {
+          const bal = await conn.getBalance(pk);
+          return bal / LAMPORTS_PER_SOL;
+        } catch (err) {
+          // try next connection
+        }
+      }
+      // wait before retrying (2s, 4s)
+      if (i < attempts - 1) await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+    }
+    return null;
+  }, [connection, fallbackConnection]);
+
   const refreshBalance = useCallback(async (pubkey) => {
     if (!pubkey) return;
     setBalanceError(null);
     const pk = new PublicKey(pubkey);
-    // Try primary RPC, then fallback if rate-limited
-    for (const conn of [connection, fallbackConnection]) {
-      try {
-        const bal = await conn.getBalance(pk);
-        setBalance(bal / LAMPORTS_PER_SOL);
-        return;
-      } catch (err) {
-        // try next RPC
-      }
+    const result = await fetchBalanceWithRetry(pk);
+    if (result !== null) {
+      setBalance(result);
+    } else {
+      setBalance(null);
+      setBalanceError('Unable to fetch SOL balance after multiple retries. Try refreshing manually.');
     }
-    setBalance(null);
-    setBalanceError('Unable to fetch SOL balance. The Solana RPC may be rate-limited — try refreshing.');
-  }, [connection, fallbackConnection]);
+  }, [fetchBalanceWithRetry]);
 
   useEffect(() => {
     const provider = window.solana;
