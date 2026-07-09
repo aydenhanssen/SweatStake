@@ -6,22 +6,41 @@ const TREASURY_WALLET = "8rPBSaGka2NiHpDdgufVoVvnPzEcnVwN49i5yf3pnk5h";
 
 export const useSolanaStake = () => {
   const stakeOnChallenge = async ({ challengeId, amountInSOL }) => {
-    // This is a placeholder until we integrate your actual wallet sendTransaction
-    console.log(`Staking ${amountInSOL} SOL for challenge ${challengeId}`);
+    const wallet = window.phantom?.solana; // Access Phantom directly
+
+    if (!wallet?.isConnected) {
+      toast.error("Phantom wallet not connected");
+      throw new Error("Wallet not connected");
+    }
+
+    const toastId = toast.loading(`Staking ${amountInSOL} SOL...`);
 
     try {
-      toast.loading(`Staking ${amountInSOL} SOL...`);
+      const connection = new Connection("https://api.devnet.solana.com");
 
-      // TODO: Connect to your real sendTransaction from usePhantomWallet
-      // For now, we'll simulate success
-      await new Promise(resolve => setTimeout(resolve, 1500)); // simulate delay
+      const lamports = Math.floor(amountInSOL * 1_000_000_000);
 
-      toast.success(`${amountInSOL} SOL staked successfully!`);
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: new PublicKey(wallet.publicKey),
+          toPubkey: new PublicKey(TREASURY_WALLET),
+          lamports,
+        })
+      );
 
-      return { success: true };
+      const { signature } = await wallet.signAndSendTransaction(transaction);
+
+      await connection.confirmTransaction(signature, "confirmed");
+
+      console.log("✅ Real SOL staked! Signature:", signature);
+
+      toast.success(`${amountInSOL} SOL staked successfully!`, { id: toastId });
+
+      return { success: true, signature };
 
     } catch (error) {
-      toast.error("Staking failed");
+      console.error(error);
+      toast.error("Transaction failed: " + error.message, { id: toastId });
       throw error;
     }
   };
