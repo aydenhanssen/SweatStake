@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 
-const SOLANA_RPC = 'https://mainnet.helius-rpc.com/?api-key=8c4d2e91-9c3f-4f3e-8b1a-2e1a3c4d5e6f';
+const SOLANA_RPC = import.meta.env.VITE_HELIUS_RPC_URL || 'https://rpc.ankr.com/solana';
 const SOLANA_RPC_FALLBACK = 'https://rpc.ankr.com/solana';
 // Replace with your real treasury wallet address
 const TREASURY_WALLET = '5ZWjBo9ooooYoeZzB2ko3C7aQ4mrqgFAj1mh3w7hqLxJ';
