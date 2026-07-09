@@ -69,29 +69,31 @@ export default function Home() {
     : 0;
 
   return (
-    <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
+    <div className="max-w-lg mx-auto px-6 pt-8 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-12 px-1">
-        <h1 className="text-xl font-black font-heading tracking-[0.15em] text-gradient-gold flex-shrink-0">SWEATSTAKE</h1>
-        <div className="flex items-center justify-center flex-1 px-8">
+      <div className="grid grid-cols-3 items-center mb-12">
+        <div className="flex items-center">
+          <h1 className="text-lg font-black font-heading tracking-[0.18em] text-gradient-gold">SWEATSTAKE</h1>
+        </div>
+        <div className="flex items-center justify-center">
           <PhantomWalletButton />
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center justify-end gap-2.5">
           {isAdmin(user?.email) && (
-            <Link to="/admin" className="w-10 h-10 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+            <Link to="/admin" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
               <Shield className="w-4 h-4 text-primary" />
             </Link>
           )}
-          <Link to="/notifications" className="relative w-10 h-10 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+          <Link to="/notifications" className="relative w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
             <Bell className="w-4 h-4 text-muted-foreground" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white">
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white ring-2 ring-background">
                 {unreadCount}
               </span>
             )}
           </Link>
           <Link to="/profile">
-            <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden border border-border hover:border-primary/30 transition-all">
+            <div className="w-9 h-9 rounded-full bg-secondary overflow-hidden border border-border hover:border-primary/40 transition-all">
               {profile.photo_url ? (
                 <img src={profile.photo_url} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -131,11 +133,12 @@ export default function Home() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="premium-card rounded-3xl p-6 mb-6"
+          className="relative overflow-hidden premium-card rounded-[1.75rem] p-6 mb-6"
         >
-          <div className="flex items-center justify-between mb-5">
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/8 rounded-full blur-3xl" />
+          <div className="relative flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold font-heading text-foreground">Active Challenge</h3>
+              <h3 className="font-extrabold font-heading text-foreground">Active Challenge</h3>
               <TierBadge tier={activeEntry.tier} />
             </div>
             <div className="flex items-center gap-1 text-muted-foreground text-sm">
@@ -182,24 +185,28 @@ export default function Home() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="premium-card rounded-3xl p-8 mb-6 text-center"
+          className="relative overflow-hidden premium-card rounded-[1.75rem] p-8 mb-6 text-center"
         >
+          <div className="absolute -top-12 -left-12 w-32 h-32 bg-orange-500/8 rounded-full blur-3xl" />
+          <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-primary/8 rounded-full blur-3xl" />
+          <div className="relative">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500/15 to-primary/10 flex items-center justify-center mx-auto mb-4 glow-primary">
             <Flame className="w-8 h-8 text-orange-400" />
           </div>
-          <h3 className="font-bold font-heading text-lg text-foreground mb-1">No Active Challenge</h3>
-          <p className="text-sm text-muted-foreground mb-5">Create or join a challenge and put your SOL on the line</p>
-          <div className="flex flex-col gap-2.5">
+          <h3 className="font-extrabold font-heading text-lg text-foreground mb-1">No Active Challenge</h3>
+          <p className="text-sm text-muted-foreground mb-6">Create or join a challenge and put your SOL on the line</p>
+          <div className="flex flex-col gap-3">
             <Link to="/create-challenge">
-              <Button className="w-full h-14 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 text-primary-foreground shadow-[0_0_30px_hsl(43_96%_56%_/_0.4)] ring-2 ring-primary/40 ring-offset-2 ring-offset-background animate-glow-pulse transition-all hover:scale-[1.02]">
+              <Button className="w-full h-16 text-lg font-black font-heading rounded-2xl bg-gradient-to-r from-primary via-yellow-400 to-yellow-500 hover:brightness-110 text-primary-foreground shadow-[0_0_36px_hsl(43_96%_56%_/_0.45)] ring-2 ring-primary/30 ring-offset-2 ring-offset-background animate-glow-pulse transition-all hover:scale-[1.02]">
                 <Plus className="w-5 h-5 mr-2" /> Create a Challenge
               </Button>
             </Link>
             <Link to="/challenges">
-              <Button variant="ghost" className="w-full font-bold font-heading rounded-2xl glass-card hover:border-primary/30 text-muted-foreground hover:text-foreground">
-                <Users className="w-4 h-4 mr-1" /> Join a Challenge
+              <Button variant="ghost" className="w-full font-bold font-heading rounded-2xl glass-card hover:border-primary/30 text-muted-foreground hover:text-foreground h-12">
+                <Users className="w-4 h-4 mr-1.5" /> Join a Challenge
               </Button>
             </Link>
+          </div>
           </div>
         </motion.div>
       )}
@@ -209,16 +216,17 @@ export default function Home() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="flex items-center gap-4 premium-card rounded-3xl p-5 mb-6"
+        className="relative overflow-hidden flex items-center gap-4 premium-card rounded-[1.75rem] p-5 mb-6"
       >
-        <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+        <div className="absolute -top-10 -right-10 w-28 h-28 bg-orange-500/8 rounded-full blur-3xl" />
+        <div className="relative w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center">
           <Flame className="w-6 h-6 text-orange-500" />
         </div>
-        <div className="flex-1">
-          <p className="text-sm text-muted-foreground">Current Streak</p>
+        <div className="relative flex-1">
+          <p className="text-sm text-muted-foreground font-medium">Current Streak</p>
           <p className="text-2xl font-black font-heading text-foreground">{profile.current_streak} <span className="text-sm font-medium text-muted-foreground">days</span></p>
         </div>
-        <p className="text-xs text-muted-foreground">Best: {profile.longest_streak}</p>
+        <p className="relative text-xs text-muted-foreground font-semibold">Best: {profile.longest_streak}</p>
       </motion.div>
 
       {/* Quick Stats */}
