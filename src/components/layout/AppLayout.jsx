@@ -1,5 +1,7 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useOutlet } from 'react-router-dom';
 import { Home, Trophy, Activity, User, Dumbbell } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import PageTransition from '@/components/shared/PageTransition';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Home' },
@@ -12,11 +14,16 @@ const navItems = [
 export default function AppLayout() {
   const location = useLocation();
   const isCheckinFlow = location.pathname === '/checkin';
+  const outlet = useOutlet();
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className={`flex-1 overflow-y-auto ${isCheckinFlow ? 'pb-4' : 'pb-20'}`}>
-        <Outlet />
+        <AnimatePresence mode="wait">
+          <PageTransition key={location.pathname}>
+            {outlet}
+          </PageTransition>
+        </AnimatePresence>
       </div>
       {!isCheckinFlow && (
         <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border z-50">
