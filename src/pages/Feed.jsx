@@ -103,8 +103,8 @@ export default function Feed() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 pt-6">
-      <h1 className="text-xl font-black mb-4">Activity</h1>
+    <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
+      <h1 className="text-xl font-black font-heading text-gradient-gold mb-6">Activity</h1>
 
       {/* Filters */}
       <div className="flex gap-2 mb-6 overflow-x-auto">
@@ -113,7 +113,7 @@ export default function Feed() {
             key={f.key}
             onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
-              filter === f.key ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground'
+              filter === f.key ? 'bg-gradient-to-r from-primary to-yellow-500 text-primary-foreground shadow-lg shadow-primary/20' : 'glass-card text-muted-foreground hover:text-foreground'
             }`}
           >
             {f.label}
@@ -125,7 +125,10 @@ export default function Feed() {
       <div className="space-y-4">
         {checkins.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-muted-foreground">No check-ins yet. Be the first!</p>
+            <div className="w-16 h-16 rounded-2xl bg-secondary/40 flex items-center justify-center mx-auto mb-4">
+              <Heart className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <p className="text-muted-foreground font-medium">No check-ins yet. Be the first!</p>
           </div>
         ) : (
           checkins.map((checkin, idx) => (
@@ -134,11 +137,11 @@ export default function Feed() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="bg-card border border-border rounded-3xl overflow-hidden"
+              className="premium-card rounded-3xl overflow-hidden"
             >
               {/* Header */}
               <div className="p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-secondary overflow-hidden flex items-center justify-center text-xs font-bold text-muted-foreground">
+                <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden flex items-center justify-center text-xs font-bold text-muted-foreground border border-border">
                   {checkin.user_photo_url ? (
                     <img src={checkin.user_photo_url} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -156,7 +159,7 @@ export default function Feed() {
               {/* Photo */}
               <div className="relative aspect-square bg-secondary">
                 <img src={checkin.photo_url} alt="Workout" className="w-full h-full object-cover" />
-                <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur px-2.5 py-1 rounded-lg">
+                <div className="absolute bottom-3 left-3 glass-card px-2.5 py-1 rounded-lg">
                   <p className="text-[10px] font-mono text-white">
                     {new Date(checkin.timestamp || checkin.created_date).toLocaleString()}
                   </p>
@@ -171,27 +174,27 @@ export default function Feed() {
               )}
 
               {/* Actions */}
-              <div className="p-4 flex items-center gap-4">
+              <div className="p-4 flex items-center gap-5">
                 <button
                   onClick={() => handleLike(checkin)}
-                  className="flex items-center gap-1.5 text-sm"
+                  className="flex items-center gap-1.5 text-sm transition-transform hover:scale-110"
                 >
                   <Heart
                     className={`w-5 h-5 transition-colors ${
                       checkin.liked_by?.includes(profile?.user_id) ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
                     }`}
                   />
-                  <span className="text-muted-foreground">{checkin.likes || 0}</span>
+                  <span className="text-muted-foreground font-semibold">{checkin.likes || 0}</span>
                 </button>
                 <button
                   onClick={() => toggleComments(checkin.id)}
-                  className="flex items-center gap-1.5 text-sm text-muted-foreground"
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground transition-transform hover:scale-110"
                 >
                   <MessageCircle className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => handleFlag(checkin)}
-                  className={`flex items-center gap-1.5 text-sm ml-auto ${
+                  className={`flex items-center gap-1.5 text-sm ml-auto transition-transform hover:scale-110 ${
                     checkin.flagged_by?.includes(profile?.user_id) ? 'text-destructive' : 'text-muted-foreground'
                   }`}
                 >
@@ -217,7 +220,7 @@ export default function Feed() {
                       className="flex-1 h-9 text-sm bg-secondary border-border rounded-xl"
                       onKeyDown={(e) => e.key === 'Enter' && handleComment(checkin.id)}
                     />
-                    <Button size="sm" onClick={() => handleComment(checkin.id)} className="rounded-xl h-9">
+                    <Button size="sm" onClick={() => handleComment(checkin.id)} className="rounded-xl h-9 bg-primary">
                       <Send className="w-3.5 h-3.5" />
                     </Button>
                   </div>

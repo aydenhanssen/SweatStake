@@ -71,27 +71,27 @@ export default function Home() {
   return (
     <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xl font-black text-primary tracking-tight flex-shrink-0">SWEATSTAKE</h1>
+      <div className="flex items-center justify-between mb-10">
+        <h1 className="text-2xl font-black font-heading tracking-tight text-gradient-gold flex-shrink-0">SWEATSTAKE</h1>
         <div className="flex items-center justify-center flex-1 px-4">
           <PhantomWalletButton />
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {isAdmin(user?.email) && (
-            <Link to="/admin" className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-card transition-colors">
-              <Shield className="w-5 h-5 text-primary" />
+            <Link to="/admin" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+              <Shield className="w-4 h-4 text-primary" />
             </Link>
           )}
-          <Link to="/notifications" className="relative w-10 h-10 flex items-center justify-center rounded-xl hover:bg-card transition-colors">
-            <Bell className="w-5 h-5 text-muted-foreground" />
+          <Link to="/notifications" className="relative w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+            <Bell className="w-4 h-4 text-muted-foreground" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white">
+              <span className="absolute top-1 right-1 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white">
                 {unreadCount}
               </span>
             )}
           </Link>
           <Link to="/profile">
-            <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden border border-border ml-1">
+            <div className="w-9 h-9 rounded-full bg-secondary overflow-hidden border border-border hover:border-primary/30 transition-all">
               {profile.photo_url ? (
                 <img src={profile.photo_url} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -108,15 +108,19 @@ export default function Home() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 rounded-3xl p-8 mb-8"
+        className="relative overflow-hidden rounded-3xl p-8 mb-6 premium-border-glow glow-primary"
       >
-        <p className="text-xs text-primary/70 font-semibold uppercase tracking-widest">Your SOL Balance</p>
-        <p className="text-5xl font-black text-primary mt-2">
-          {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
-        </p>
-        <p className="text-sm text-muted-foreground mt-2">
-          {connected ? 'SOL' : 'Connect Phantom to stake SOL'}
-        </p>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-violet/5 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-primary/5 animate-gradient-shift" style={{ backgroundSize: '200% 200%' }} />
+        <div className="relative">
+          <p className="text-xs text-primary/80 font-bold uppercase tracking-widest font-heading">Your SOL Balance</p>
+          <p className="text-5xl font-black text-gradient-gold mt-2 font-heading">
+            {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 font-medium">
+            {connected ? 'SOL' : 'Connect Phantom to stake SOL'}
+          </p>
+        </div>
       </motion.div>
 
       {/* Active Challenge */}
@@ -125,11 +129,11 @@ export default function Home() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-card border border-border rounded-3xl p-6 mb-6"
+          className="premium-card rounded-3xl p-6 mb-6"
         >
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-foreground">Active Challenge</h3>
+              <h3 className="font-bold font-heading text-foreground">Active Challenge</h3>
               <TierBadge tier={activeEntry.tier} />
             </div>
             <div className="flex items-center gap-1 text-muted-foreground text-sm">
@@ -144,7 +148,7 @@ export default function Home() {
               <span className="text-muted-foreground">Check-ins</span>
               <span className="font-bold text-foreground">{activeEntry.checkins_completed}/{activeEntry.checkins_required}</span>
             </div>
-            <div className="h-3 bg-secondary rounded-full overflow-hidden">
+            <div className="h-3 bg-secondary/60 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-primary to-yellow-300 rounded-full"
                 initial={{ width: 0 }}
@@ -155,18 +159,18 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-secondary/50 rounded-2xl p-3 text-center">
+            <div className="bg-secondary/40 rounded-2xl p-3 text-center">
               <p className="text-xs text-muted-foreground">Your Stake</p>
-              <p className="text-lg font-black text-foreground">{(activeEntry.sol_stake_amount || 0).toFixed(2)} SOL</p>
+              <p className="text-lg font-black font-heading text-foreground">{(activeEntry.sol_stake_amount || 0).toFixed(2)} SOL</p>
             </div>
-            <div className="bg-secondary/50 rounded-2xl p-3 text-center">
+            <div className="bg-primary/5 rounded-2xl p-3 text-center border border-primary/10">
               <p className="text-xs text-muted-foreground">Total Pot</p>
-              <p className="text-lg font-black text-primary">{(challenge.sol_total_pot || 0).toFixed(2)} SOL</p>
+              <p className="text-lg font-black font-heading text-gradient-gold">{(challenge.sol_total_pot || 0).toFixed(2)} SOL</p>
             </div>
           </div>
 
           <Link to="/checkin">
-            <Button className="w-full mt-4 h-14 text-lg font-black rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
+            <Button className="w-full mt-4 h-14 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-[1.02]">
               <Dumbbell className="w-5 h-5 mr-2" /> CHECK IN
             </Button>
           </Link>
@@ -176,19 +180,21 @@ export default function Home() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-card border border-border rounded-3xl p-6 mb-4 text-center"
+          className="premium-card rounded-3xl p-8 mb-6 text-center"
         >
-          <Dumbbell className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-          <h3 className="font-bold text-foreground mb-1">No Active Challenge</h3>
-          <p className="text-sm text-muted-foreground mb-4">Create or join a challenge and put your SOL on the line</p>
-          <div className="flex flex-col gap-2">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Dumbbell className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="font-bold font-heading text-lg text-foreground mb-1">No Active Challenge</h3>
+          <p className="text-sm text-muted-foreground mb-5">Create or join a challenge and put your SOL on the line</p>
+          <div className="flex flex-col gap-2.5">
             <Link to="/create-challenge">
-              <Button className="w-full h-16 text-lg font-black rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/50 ring-offset-2 ring-offset-background animate-pulse">
-                <Plus className="w-6 h-6 mr-2" /> Create a Challenge
+              <Button className="w-full h-14 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 text-primary-foreground shadow-lg shadow-primary/40 ring-1 ring-primary/30 animate-glow-pulse transition-all hover:scale-[1.02]">
+                <Plus className="w-5 h-5 mr-2" /> Create a Challenge
               </Button>
             </Link>
             <Link to="/challenges">
-              <Button variant="outline" className="w-full font-bold rounded-2xl">
+              <Button variant="ghost" className="w-full font-bold font-heading rounded-2xl glass-card hover:border-primary/30 text-muted-foreground hover:text-foreground">
                 <Users className="w-4 h-4 mr-1" /> Join a Challenge
               </Button>
             </Link>
@@ -201,14 +207,14 @@ export default function Home() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="flex items-center gap-4 bg-card border border-border rounded-3xl p-4 mb-6"
+        className="flex items-center gap-4 premium-card rounded-3xl p-5 mb-6"
       >
         <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center">
           <Flame className="w-6 h-6 text-orange-500" />
         </div>
         <div className="flex-1">
           <p className="text-sm text-muted-foreground">Current Streak</p>
-          <p className="text-2xl font-black text-foreground">{profile.current_streak} <span className="text-sm font-medium text-muted-foreground">days</span></p>
+          <p className="text-2xl font-black font-heading text-foreground">{profile.current_streak} <span className="text-sm font-medium text-muted-foreground">days</span></p>
         </div>
         <p className="text-xs text-muted-foreground">Best: {profile.longest_streak}</p>
       </motion.div>

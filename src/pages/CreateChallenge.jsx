@@ -121,21 +121,21 @@ export default function CreateChallenge() {
 
   if (success) {
     return (
-      <div className="max-w-lg mx-auto px-4 pt-6 min-h-screen flex flex-col items-center justify-center text-center gap-6">
+      <div className="max-w-lg mx-auto px-5 pt-8 min-h-screen flex flex-col items-center justify-center text-center gap-6">
         <motion.div
           initial={{ scale: 0, rotate: -30 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.1 }}
           className="relative w-28 h-28 flex items-center justify-center"
         >
-          <div className="absolute inset-0 rounded-full bg-primary/10 border-2 border-primary/40" />
+          <div className="absolute inset-0 rounded-full bg-primary/10 border-2 border-primary/40 glow-primary" />
           <Check className="w-14 h-14 text-primary" strokeWidth={3} />
         </motion.div>
         <div>
-          <h2 className="text-2xl font-black text-foreground">Challenge Created!</h2>
+          <h2 className="text-2xl font-black font-heading text-gradient-gold">Challenge Created!</h2>
           <p className="text-muted-foreground mt-2">You staked {solStakeAmount} SOL. Time to sweat.</p>
         </div>
-        <Button onClick={() => navigate('/')} className="font-bold rounded-2xl px-8">
+        <Button onClick={() => navigate('/')} className="font-bold font-heading rounded-2xl px-8 bg-gradient-to-r from-primary to-yellow-500 shadow-lg shadow-primary/30">
           Back to Dashboard
         </Button>
       </div>
@@ -145,12 +145,12 @@ export default function CreateChallenge() {
   const isPremium = profile.is_premium;
 
   return (
-    <div className="max-w-lg mx-auto px-4 pt-6 pb-8">
-      <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="p-2 rounded-xl bg-card border border-border">
-          <ArrowLeft className="w-5 h-5" />
+    <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
+      <div className="flex items-center gap-3 mb-8">
+        <Link to="/" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+          <ArrowLeft className="w-4 h-4" />
         </Link>
-        <h1 className="text-xl font-black">Create Challenge</h1>
+        <h1 className="text-xl font-black font-heading text-gradient-gold">Create Challenge</h1>
         <div className="ml-auto">
           <PhantomWalletButton />
         </div>
@@ -158,7 +158,7 @@ export default function CreateChallenge() {
 
       {/* Challenge Name */}
       <div className="mb-5">
-        <label className="text-sm font-bold text-foreground mb-2 block">Challenge Name</label>
+        <label className="text-sm font-bold font-heading text-foreground mb-2 block">Challenge Name</label>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -170,7 +170,7 @@ export default function CreateChallenge() {
 
       {/* Tier Selection */}
       <div className="mb-5">
-        <label className="text-sm font-bold text-foreground mb-3 block">Difficulty Tier</label>
+        <label className="text-sm font-bold font-heading text-foreground mb-3 block">Difficulty Tier</label>
         <div className="grid grid-cols-2 gap-3">
           {Object.entries(TIERS).map(([key, t]) => {
             const isLocked = !isPremium && key !== 'bronze';
@@ -182,8 +182,8 @@ export default function CreateChallenge() {
                 disabled={isLocked}
                 className={`relative rounded-2xl border p-4 text-left transition-all ${
                   isSelected
-                    ? 'border-primary bg-primary/10 shadow-lg shadow-primary/10'
-                    : 'border-border bg-card hover:border-primary/30'
+                    ? 'border-primary/50 bg-primary/10 glow-primary'
+                    : 'glass-card hover:border-primary/30'
                 } ${isLocked ? 'opacity-50' : ''}`}
               >
                 {isSelected && (
@@ -191,7 +191,7 @@ export default function CreateChallenge() {
                     <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />
                   </div>
                 )}
-                <p className={`font-black text-base ${t.color}`}>{t.label}</p>
+                <p className={`font-black font-heading text-base ${t.color}`}>{t.label}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t.workouts}x / week</p>
                 <p className="text-xs text-muted-foreground mt-2">Up to {t.maxSolStake} SOL</p>
                 {isLocked && (
@@ -209,16 +209,16 @@ export default function CreateChallenge() {
 
       {/* Duration */}
       <div className="mb-5">
-        <label className="text-sm font-bold text-foreground mb-3 block">Duration</label>
+        <label className="text-sm font-bold font-heading text-foreground mb-3 block">Duration</label>
         <div className="grid grid-cols-3 gap-3">
           {DURATIONS.map((d) => (
             <button
               key={d.key}
               onClick={() => setDuration(d.key)}
-              className={`rounded-2xl border py-3 text-sm font-bold transition-all ${
+              className={`rounded-2xl border py-3 text-sm font-bold font-heading transition-all ${
                 duration === d.key
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-card text-muted-foreground hover:border-primary/30'
+                  ? 'border-primary/50 bg-primary/10 text-primary'
+                  : 'glass-card text-muted-foreground hover:border-primary/30'
               }`}
             >
               {d.label}
@@ -229,7 +229,7 @@ export default function CreateChallenge() {
 
       {/* SOL Stake Amount */}
       <div className="mb-5">
-        <label className="text-sm font-bold text-foreground mb-2 block">Stake SOL (via Phantom)</label>
+        <label className="text-sm font-bold font-heading text-foreground mb-2 block">Stake SOL (via Phantom)</label>
         <div className="relative">
           <Input
             type="number"
@@ -240,7 +240,7 @@ export default function CreateChallenge() {
             max={tier.maxSolStake}
             className="bg-card border-border rounded-2xl h-12 pr-16 text-lg font-bold"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#AB9FF2]">SOL</span>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-violet">SOL</span>
         </div>
         <div className="flex items-center justify-between mt-2">
           <span className="text-xs text-muted-foreground">Min: {MIN_SOL_STAKE} SOL</span>
@@ -255,8 +255,8 @@ export default function CreateChallenge() {
 
       {/* Privacy Toggle */}
       <div className="mb-6">
-        <label className="text-sm font-bold text-foreground mb-3 block">Visibility</label>
-        <div className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between">
+        <label className="text-sm font-bold font-heading text-foreground mb-3 block">Visibility</label>
+        <div className="glass-card rounded-2xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {isPublic ? (
               <Globe className="w-5 h-5 text-primary" />
@@ -273,7 +273,7 @@ export default function CreateChallenge() {
       </div>
 
       {/* Summary */}
-      <div className="bg-card border border-border rounded-2xl p-4 mb-4 space-y-2">
+      <div className="glass-card rounded-2xl p-4 mb-4 space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Workouts required</span>
           <span className="font-bold text-foreground">{tier.workouts}x / week</span>
@@ -284,7 +284,7 @@ export default function CreateChallenge() {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Your stake</span>
-          <span className="font-bold text-primary">{solStakeAmount} SOL</span>
+          <span className="font-bold text-gradient-gold">{solStakeAmount} SOL</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Platform fee on loss</span>
@@ -296,7 +296,7 @@ export default function CreateChallenge() {
       <Button
         onClick={handleSubmit}
         disabled={submitting || !name.trim() || solStakeAmount < MIN_SOL_STAKE || !walletConnected}
-        className="w-full h-14 text-lg font-black rounded-2xl"
+        className="w-full h-14 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 shadow-lg shadow-primary/30 transition-all hover:scale-[1.02]"
       >
         {submitting ? (
           <>

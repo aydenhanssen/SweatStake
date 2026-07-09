@@ -109,19 +109,19 @@ export default function Challenges() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 pt-6">
-      <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="p-2 rounded-xl bg-card border border-border">
-          <ArrowLeft className="w-5 h-5" />
+    <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
+      <div className="flex items-center gap-3 mb-8">
+        <Link to="/" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+          <ArrowLeft className="w-4 h-4" />
         </Link>
-        <h1 className="text-xl font-black">Join a Challenge</h1>
+        <h1 className="text-xl font-black font-heading text-gradient-gold">Join a Challenge</h1>
         <div className="ml-auto">
           <PhantomWalletButton />
         </div>
       </div>
 
       {!walletConnected && (
-        <div className="bg-[#AB9FF2]/10 border border-[#AB9FF2]/30 rounded-2xl p-3 mb-4 text-center">
+        <div className="glass-card border-violet/30 rounded-2xl p-4 mb-6 text-center glow-violet">
           <p className="text-sm text-foreground font-semibold">Connect your Phantom wallet to join and stake SOL</p>
         </div>
       )}
@@ -135,8 +135,8 @@ export default function Challenges() {
           return (
             <div
               key={key}
-              className={`bg-card border rounded-3xl p-5 transition-all cursor-pointer ${
-                isSelected ? 'border-primary shadow-lg shadow-primary/10' : 'border-border'
+              className={`premium-card rounded-3xl p-5 transition-all cursor-pointer ${
+                isSelected ? 'border-primary/50 glow-primary' : ''
               } ${isLocked ? 'opacity-50' : ''}`}
               onClick={() => !isLocked && setSelectedTier(isSelected ? null : key)}
             >
@@ -181,12 +181,12 @@ export default function Challenges() {
                     <p className="text-xs text-muted-foreground mt-1">Min {MIN_SOL_STAKE} SOL · Max {tier.maxSolStake} SOL</p>
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Current pot: <span className="font-semibold text-primary">{(ch.sol_total_pot || 0).toFixed(2)} SOL</span>
+                    Current pot: <span className="font-semibold text-gradient-gold">{(ch.sol_total_pot || 0).toFixed(2)} SOL</span>
                   </p>
                   <Button
                     onClick={() => handleJoin(ch)}
                     disabled={joining || !walletConnected}
-                    className="w-full h-12 font-black rounded-2xl text-base"
+                    className="w-full h-12 font-black font-heading rounded-2xl bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 shadow-lg shadow-primary/30"
                   >
                     {joining ? 'Joining...' : `Stake ${solStakeAmount} SOL`}
                   </Button>

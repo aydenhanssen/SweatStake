@@ -1,47 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
 @layer base {
   :root {
-    --background: 220 15% 6%;
-    --foreground: 45 100% 96%;
-    --card: 220 15% 10%;
-    --card-foreground: 45 100% 96%;
-    --popover: 220 15% 10%;
-    --popover-foreground: 45 100% 96%;
+    --background: 240 20% 4%;
+    --foreground: 45 30% 96%;
+    --card: 240 16% 8%;
+    --card-foreground: 45 30% 96%;
+    --popover: 240 16% 8%;
+    --popover-foreground: 45 30% 96%;
     --primary: 43 96% 56%;
-    --primary-foreground: 220 15% 6%;
-    --secondary: 220 12% 16%;
+    --primary-foreground: 240 20% 4%;
+    --secondary: 240 14% 13%;
     --secondary-foreground: 45 20% 80%;
-    --muted: 220 12% 14%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 240 12% 12%;
+    --muted-foreground: 240 8% 45%;
     --accent: 43 96% 56%;
-    --accent-foreground: 220 15% 6%;
+    --accent-foreground: 240 20% 4%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 12% 18%;
-    --input: 220 12% 18%;
+    --border: 240 14% 16%;
+    --input: 240 14% 16%;
     --ring: 43 96% 56%;
+    --violet: 258 90% 66%;
+    --violet-light: 258 90% 76%;
     --chart-1: 43 96% 56%;
-    --chart-2: 43 80% 40%;
-    --chart-3: 220 15% 30%;
+    --chart-2: 258 90% 66%;
+    --chart-3: 240 15% 30%;
     --chart-4: 43 60% 70%;
     --chart-5: 0 72% 51%;
-    --radius: 0.75rem;
-    --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --radius: 1rem;
+    --font-heading: 'Sora', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    --sidebar-background: 220 15% 8%;
+    --sidebar-background: 240 20% 6%;
     --sidebar-foreground: 45 20% 80%;
     --sidebar-primary: 43 96% 56%;
-    --sidebar-primary-foreground: 220 15% 6%;
-    --sidebar-accent: 220 12% 16%;
+    --sidebar-primary-foreground: 240 20% 4%;
+    --sidebar-accent: 240 14% 13%;
     --sidebar-accent-foreground: 45 20% 80%;
-    --sidebar-border: 220 12% 18%;
+    --sidebar-border: 240 14% 16%;
     --sidebar-ring: 43 96% 56%;
   }
 }
@@ -52,17 +54,76 @@
   }
   body {
     @apply bg-background text-foreground font-body antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(258 90% 66% / 0.08), transparent),
+      radial-gradient(ellipse 60% 50% at 80% 100%, hsl(43 96% 56% / 0.05), transparent);
+    background-attachment: fixed;
   }
 }
 
-/* Custom scrollbar */
+@layer components {
+  .glass-card {
+    background: hsl(240 16% 10% / 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(240 14% 18% / 0.6);
+  }
+  .glass-nav {
+    background: hsl(240 20% 6% / 0.8);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(43 96% 56% / 0.15), 0 0 40px hsl(43 96% 56% / 0.08);
+  }
+  .glow-violet {
+    box-shadow: 0 0 20px hsl(258 90% 66% / 0.15), 0 0 40px hsl(258 90% 66% / 0.08);
+  }
+  .glow-primary-strong {
+    box-shadow: 0 0 24px hsl(43 96% 56% / 0.3), 0 0 48px hsl(43 96% 56% / 0.15), 0 4px 16px hsl(0 0% 0% / 0.4);
+  }
+  .text-gradient-gold {
+    background: linear-gradient(135deg, hsl(43 96% 62%), hsl(43 80% 50%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .text-gradient-violet {
+    background: linear-gradient(135deg, hsl(258 90% 70%), hsl(280 80% 60%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .premium-card {
+    background: linear-gradient(135deg, hsl(240 16% 10% / 0.8), hsl(240 16% 7% / 0.9));
+    border: 1px solid hsl(240 14% 18% / 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .premium-border-glow {
+    position: relative;
+  }
+  .premium-border-glow::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(43 96% 56% / 0.4), hsl(258 90% 66% / 0.2), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 ::-webkit-scrollbar-track {
-  background: hsl(220, 15%, 8%);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(220, 12%, 20%);
+  background: hsl(240 14% 20%);
   border-radius: 4px;
 }

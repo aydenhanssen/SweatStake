@@ -62,37 +62,39 @@ export default function Profile() {
     : 0;
 
   return (
-    <div className="max-w-lg mx-auto px-4 pt-6">
+    <div className="max-w-lg mx-auto px-5 pt-8 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-black">Profile</h1>
-        <Link to="/settings" className="p-2 rounded-xl bg-card border border-border">
-          <Settings className="w-5 h-5 text-muted-foreground" />
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-xl font-black font-heading text-gradient-gold">Profile</h1>
+        <Link to="/settings" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
+          <Settings className="w-4 h-4 text-muted-foreground" />
         </Link>
       </div>
 
       {/* Profile Card */}
-      <div className="bg-card border border-border rounded-3xl p-6 mb-6 text-center">
-        <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-secondary overflow-hidden border-2 border-primary/20">
+      <div className="premium-card rounded-3xl p-8 mb-6 text-center">
+        <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-secondary overflow-hidden border-2 border-primary/30 glow-primary">
           {profile.photo_url ? (
             <img src={profile.photo_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-2xl font-black text-muted-foreground">
+            <div className="w-full h-full flex items-center justify-center text-3xl font-black text-muted-foreground">
               {profile.username?.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
-        <h2 className="text-lg font-black text-foreground">{profile.username}</h2>
+        <h2 className="text-xl font-black font-heading text-foreground">{profile.username}</h2>
         <p className="text-sm text-muted-foreground capitalize">{profile.fitness_level} · {profile.primary_goal?.replace('_', ' ')}</p>
         {profile.is_premium && (
-          <span className="inline-block mt-2 text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">⭐ Premium</span>
+          <span className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+            <Star className="w-3 h-3 fill-current" /> Premium
+          </span>
         )}
         {isAdmin(user?.email) && (
           <Button
             onClick={togglePremium}
             disabled={togglingPremium}
-            variant={profile.is_premium ? 'outline' : 'default'}
-            className="mt-3 rounded-2xl font-bold"
+            variant={profile.is_premium ? 'ghost' : 'default'}
+            className="mt-4 rounded-2xl font-bold font-heading"
           >
             <Star className={`w-4 h-4 ${profile.is_premium ? 'fill-current' : ''}`} />
             {profile.is_premium ? 'Remove Premium' : 'Grant Premium'}
@@ -102,12 +104,13 @@ export default function Profile() {
 
       {/* SOL Won */}
       <Link to="/wallet" className="block mb-6">
-        <div className="bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 rounded-3xl p-5 flex items-center justify-between transition-all hover:border-primary/40">
-          <div>
-            <p className="text-xs text-primary/70 font-semibold uppercase tracking-wider">Total SOL Won</p>
-            <p className="text-3xl font-black text-primary">{(profile.total_sol_won || 0).toFixed(4)}</p>
+        <div className="relative overflow-hidden premium-border-glow rounded-3xl p-6 flex items-center justify-between transition-all hover:scale-[1.02]">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/15 to-violet/5" />
+          <div className="relative">
+            <p className="text-xs text-primary/80 font-bold uppercase tracking-widest font-heading">Total SOL Won</p>
+            <p className="text-3xl font-black font-heading text-gradient-gold mt-1">{(profile.total_sol_won || 0).toFixed(4)}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="relative flex items-center gap-2">
             <Wallet className="w-5 h-5 text-primary/60" />
             <ChevronRight className="w-5 h-5 text-primary/40" />
           </div>
@@ -124,20 +127,20 @@ export default function Profile() {
 
       {/* Active Challenges */}
       <div className="mb-6">
-        <h3 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">Active Challenges</h3>
+        <h3 className="text-sm font-bold font-heading text-foreground mb-3 uppercase tracking-wider">Active Challenges</h3>
         {activeEntries.length === 0 ? (
-          <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <div className="premium-card rounded-2xl p-4 text-center">
             <p className="text-sm text-muted-foreground">No active challenges</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {activeEntries.map(entry => (
-              <div key={entry.id} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between">
+              <div key={entry.id} className="premium-card rounded-2xl p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <TierBadge tier={entry.tier} />
                   <span className="text-sm font-semibold">{entry.checkins_completed}/{entry.checkins_required}</span>
                 </div>
-                <span className="text-sm font-bold text-primary">{(entry.sol_stake_amount || 0).toFixed(2)} SOL</span>
+                <span className="text-sm font-bold text-gradient-gold">{(entry.sol_stake_amount || 0).toFixed(2)} SOL</span>
               </div>
             ))}
           </div>
@@ -146,9 +149,9 @@ export default function Profile() {
 
       {/* Badges */}
       <div className="mb-6">
-        <h3 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">Badges</h3>
+        <h3 className="text-sm font-bold font-heading text-foreground mb-3 uppercase tracking-wider">Badges</h3>
         {(!profile.badges || profile.badges.length === 0) ? (
-          <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <div className="premium-card rounded-2xl p-4 text-center">
             <p className="text-sm text-muted-foreground">No badges earned yet</p>
           </div>
         ) : (
@@ -157,7 +160,7 @@ export default function Profile() {
               const b = BADGE_LABELS[badge];
               if (!b) return null;
               return (
-                <div key={badge} className="flex items-center gap-1.5 bg-primary/10 border border-primary/20 rounded-full px-3 py-1.5">
+                <div key={badge} className="flex items-center gap-1.5 bg-primary/10 border border-primary/20 rounded-full px-3 py-1.5 glow-primary">
                   <Award className="w-3.5 h-3.5 text-primary" />
                   <span className="text-xs font-bold text-primary">{b.label}</span>
                 </div>
