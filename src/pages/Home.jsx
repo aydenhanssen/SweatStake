@@ -73,10 +73,10 @@ export default function Home() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-xl font-black text-primary tracking-tight flex-shrink-0">SWEATSTAKE</h1>
-        <div className="flex items-center justify-center flex-1">
+        <div className="flex items-center justify-center flex-1 px-4">
           <PhantomWalletButton />
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-3 flex-shrink-0">
           {isAdmin(user?.email) && (
             <Link to="/admin" className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-card transition-colors">
               <Shield className="w-5 h-5 text-primary" />
@@ -115,7 +115,7 @@ export default function Home() {
           {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
         </p>
         <p className="text-sm text-muted-foreground mt-2">
-          {connected ? 'SOL' : 'Connect wallet to view balance'}
+          {connected ? 'SOL' : 'Connect Phantom to stake SOL'}
         </p>
       </motion.div>
 
@@ -183,8 +183,8 @@ export default function Home() {
           <p className="text-sm text-muted-foreground mb-4">Create or join a challenge and put your SOL on the line</p>
           <div className="flex flex-col gap-2">
             <Link to="/create-challenge">
-              <Button className="w-full font-bold rounded-2xl">
-                <Plus className="w-4 h-4 mr-1" /> Create a Challenge
+              <Button className="w-full h-16 text-lg font-black rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/50 ring-offset-2 ring-offset-background animate-pulse">
+                <Plus className="w-6 h-6 mr-2" /> Create a Challenge
               </Button>
             </Link>
             <Link to="/challenges">

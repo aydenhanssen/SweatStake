@@ -1,13 +1,13 @@
 import { Outlet, Link, useLocation, useOutlet } from 'react-router-dom';
-import { Home, Trophy, Activity, User, Dumbbell } from 'lucide-react';
+import { Home, Trophy, Activity, User, Medal } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import PageTransition from '@/components/shared/PageTransition';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Home' },
   { path: '/feed', icon: Activity, label: 'Feed' },
-  { path: '/checkin', icon: Dumbbell, label: 'Check In' },
-  { path: '/leaderboard', icon: Trophy, label: 'Ranks' },
+  { path: '/checkin', icon: Trophy, label: 'Check In' },
+  { path: '/leaderboard', icon: Medal, label: 'Ranks' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 
