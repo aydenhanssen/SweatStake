@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Camera, AlertCircle, Loader2, Shield } from 'lucide-react';
+import { X, Camera, AlertCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function VerificationCamera({ onCapture, onClose }) {
@@ -87,36 +87,8 @@ export default function VerificationCamera({ onCapture, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2 z-10 shrink-0">
-        <button
-          onClick={onClose}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-black/50 backdrop-blur active:scale-95 transition-transform"
-        >
-          <X className="w-4 h-4 text-white" />
-          <span className="text-white text-sm font-bold">Cancel</span>
-        </button>
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-black/50 backdrop-blur">
-          <Shield className="w-4 h-4 text-primary" />
-          <span className="text-white font-bold text-sm">Verify Workout</span>
-        </div>
-      </div>
-
-      {/* Camera feed — takes most of the screen */}
-      <div className="flex-1 relative overflow-hidden min-h-0">
-        {status === 'requesting' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-            <p className="text-white/70 text-sm">Starting camera...</p>
-          </div>
-        )}
-        {status === 'error' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
-            <AlertCircle className="w-10 h-10 text-destructive" />
-            <p className="text-white text-sm">{errorMsg}</p>
-            <button onClick={handleRetry} className="mt-2 text-primary text-sm font-bold">Retry</button>
-          </div>
-        )}
+      {/* Full-screen camera feed */}
+      <div className="absolute inset-0">
         {status !== 'error' && (
           <video
             ref={videoRef}
@@ -126,25 +98,43 @@ export default function VerificationCamera({ onCapture, onClose }) {
             className="w-full h-full object-cover"
           />
         )}
-      </div>
 
-      {/* Bottom capture bar */}
-      <div className="shrink-0 px-4 pt-4 pb-8 z-10 bg-gradient-to-t from-black to-transparent">
-        {status === 'ready' ? (
-          <div className="flex flex-col items-center gap-2">
-            <motion.button
-              onClick={handleCapture}
-              whileTap={{ scale: 0.9 }}
-              className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-white/10 backdrop-blur shadow-lg"
-            >
-              <Camera className="w-8 h-8 text-white" />
-            </motion.button>
-            <p className="text-white/60 text-xs font-medium">Tap to capture your workout proof</p>
+        {status === 'requesting' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <p className="text-white/70 text-sm">Starting camera...</p>
           </div>
-        ) : (
-          <div className="h-24" />
+        )}
+
+        {status === 'error' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
+            <AlertCircle className="w-10 h-10 text-destructive" />
+            <p className="text-white text-sm">{errorMsg}</p>
+            <button onClick={handleRetry} className="mt-2 text-primary text-sm font-bold">Retry</button>
+          </div>
         )}
       </div>
+
+      {/* Cancel button — top left only */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 left-4 z-10 p-2 rounded-full bg-black/40 backdrop-blur active:scale-95 transition-transform"
+      >
+        <X className="w-5 h-5 text-white" />
+      </button>
+
+      {/* Capture button — bottom center only */}
+      {status === 'ready' && (
+        <div className="absolute bottom-0 left-0 right-0 z-10 pb-10 flex justify-center">
+          <motion.button
+            onClick={handleCapture}
+            whileTap={{ scale: 0.9 }}
+            className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-white/10 backdrop-blur shadow-2xl"
+          >
+            <Camera className="w-8 h-8 text-white" />
+          </motion.button>
+        </div>
+      )}
     </div>
   );
 }
