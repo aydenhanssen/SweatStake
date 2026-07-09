@@ -32,7 +32,6 @@ export default function VerificationCamera({ onCapture, onClose }) {
         const video = videoRef.current;
         if (video) {
           video.srcObject = stream;
-          // Explicitly play — fixes black screen on mobile Safari/Chrome
           video.onloadedmetadata = () => {
             video.play().then(() => {
               if (!cancelled) setStatus('ready');
@@ -68,7 +67,6 @@ export default function VerificationCamera({ onCapture, onClose }) {
 
   const handleRetry = () => {
     setStatus('requesting');
-    // Re-trigger by reloading component state
     window.location.reload();
   };
 
@@ -89,18 +87,23 @@ export default function VerificationCamera({ onCapture, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      <div className="flex items-center justify-between p-4 z-10">
-        <button onClick={onClose} className="p-2 rounded-full bg-black/40 backdrop-blur">
-          <X className="w-5 h-5 text-white" />
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-2 z-10 shrink-0">
+        <button
+          onClick={onClose}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-black/50 backdrop-blur active:scale-95 transition-transform"
+        >
+          <X className="w-4 h-4 text-white" />
+          <span className="text-white text-sm font-bold">Cancel</span>
         </button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-black/50 backdrop-blur">
           <Shield className="w-4 h-4 text-primary" />
           <span className="text-white font-bold text-sm">Verify Workout</span>
         </div>
-        <div className="w-9" />
       </div>
 
-      <div className="flex-1 relative overflow-hidden">
+      {/* Camera feed — takes most of the screen */}
+      <div className="flex-1 relative overflow-hidden min-h-0">
         {status === 'requesting' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -125,20 +128,23 @@ export default function VerificationCamera({ onCapture, onClose }) {
         )}
       </div>
 
-      {status === 'ready' && (
-        <div className="p-4 pb-8 z-10">
-          <div className="flex justify-center">
+      {/* Bottom capture bar */}
+      <div className="shrink-0 px-4 pt-4 pb-8 z-10 bg-gradient-to-t from-black to-transparent">
+        {status === 'ready' ? (
+          <div className="flex flex-col items-center gap-2">
             <motion.button
               onClick={handleCapture}
               whileTap={{ scale: 0.9 }}
-              className="w-20 h-20 rounded-full bg-white/10 border-4 border-white flex items-center justify-center backdrop-blur"
+              className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-white/10 backdrop-blur shadow-lg"
             >
               <Camera className="w-8 h-8 text-white" />
             </motion.button>
+            <p className="text-white/60 text-xs font-medium">Tap to capture your workout proof</p>
           </div>
-          <p className="text-white/50 text-xs text-center mt-3">Tap to capture your workout proof</p>
-        </div>
-      )}
+        ) : (
+          <div className="h-24" />
+        )}
+      </div>
     </div>
   );
 }

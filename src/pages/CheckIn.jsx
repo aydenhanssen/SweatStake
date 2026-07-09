@@ -152,13 +152,6 @@ export default function CheckInPage() {
           >
             <div className="relative rounded-3xl overflow-hidden aspect-square bg-card">
               <img src={photoPreview} alt="Workout proof" className="w-full h-full object-cover" />
-              <button
-                onClick={handleRetake}
-                className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur rounded-full flex items-center gap-1.5"
-              >
-                <RotateCcw className="w-4 h-4 text-white" />
-                <span className="text-white text-xs font-bold">Retake</span>
-              </button>
             </div>
 
             <div>
@@ -195,13 +188,24 @@ export default function CheckInPage() {
               />
             </div>
 
-            <Button
-              onClick={handleSubmit}
-              disabled={!workoutType || submitting}
-              className="h-14 text-lg font-black rounded-2xl mt-auto"
-            >
-              {submitting ? 'Submitting...' : 'Submit Check In'}
-            </Button>
+            <div className="flex gap-3 mt-auto pb-2">
+              <Button
+                onClick={handleRetake}
+                variant="outline"
+                className="h-14 flex-1 text-base font-bold rounded-2xl"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Retake
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={!workoutType || submitting}
+                className="h-14 flex-1 text-base font-black rounded-2xl"
+              >
+                <Check className="w-5 h-5" />
+                {submitting ? 'Submitting...' : 'Submit Proof'}
+              </Button>
+            </div>
           </motion.div>
         )}
 
