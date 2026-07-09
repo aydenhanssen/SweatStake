@@ -31,7 +31,7 @@ export default function PhantomWalletButton({ compact = false }) {
             <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.3L19.5 8 12 11.7 4.5 8 12 4.3z"/>
           </svg>
         )}
-        {compact ? '' : 'Connect Phantom'}
+        {compact ? '' : <span className="hidden sm:inline">Connect Phantom</span>}
       </button>
     );
   }

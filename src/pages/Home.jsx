@@ -71,14 +71,10 @@ export default function Home() {
   return (
     <div className="max-w-lg mx-auto px-6 pt-8 pb-8">
       {/* Header */}
-      <div className="grid grid-cols-3 items-center mb-12">
-        <div className="flex items-center">
-          <h1 className="text-lg font-black font-heading tracking-[0.18em] text-gradient-gold">SWEATSTAKE</h1>
-        </div>
-        <div className="flex items-center justify-center">
-          <PhantomWalletButton />
-        </div>
-        <div className="flex items-center justify-end gap-2.5">
+      <div className="flex items-center justify-between mb-12 gap-3">
+        <h1 className="text-base sm:text-lg font-black font-heading tracking-[0.15em] text-gradient-gold flex-shrink-0">SWEATSTAKE</h1>
+        <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+          <PhantomWalletButton compact={false} />
           {isAdmin(user?.email) && (
             <Link to="/admin" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
               <Shield className="w-4 h-4 text-primary" />
