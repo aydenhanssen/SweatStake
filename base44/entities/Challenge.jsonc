@@ -39,11 +39,51 @@
     "platform_fee_collected": {
       "type": "number",
       "default": 0
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "duration_days": {
+      "type": "number"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "stake_amount": {
+      "type": "number"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "3x_week",
+        "5x_week",
+        "custom"
+      ]
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true
+    },
+    "creator": {
+      "type": "string"
+    },
+    "proof_requirement": {
+      "type": "string",
+      "default": "camera-only"
+    },
+    "target_metric": {
+      "type": "string"
     }
   },
   "required": [
     "tier",
     "week_start",
-    "week_end"
+    "week_end",
+    "title"
   ]
 }
