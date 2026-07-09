@@ -1,12 +1,23 @@
 import { useState } from 'react';
 import { usePhantomWallet } from '@/lib/phantomWallet';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 
 export default function PhantomWalletButton({ compact = false }) {
-  const { connected, shortenedAddress, balance, connecting, connect, disconnect } = usePhantomWallet();
+  const { connected, shortenedAddress, balance, connecting, connect, disconnect, refreshBalance } = usePhantomWallet();
   const { toast } = useToast();
   const [showMenu, setShowMenu] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async (e) => {
+    e.stopPropagation();
+    setRefreshing(true);
+    try {
+      await refreshBalance();
+    } finally {
+      setTimeout(() => setRefreshing(false), 500);
+    }
+  };
 
   const handleConnect = async () => {
     try {
@@ -45,8 +56,15 @@ export default function PhantomWalletButton({ compact = false }) {
         <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
         <span className="font-bold text-foreground">{shortenedAddress}</span>
         {balance !== null && (
-          <span className="text-muted-foreground">{balance.toFixed(3)} SOL</span>
+          <span className="text-muted-foreground">{balance.toFixed(4)} SOL</span>
         )}
+        <span
+          onClick={handleRefresh}
+          className="ml-0.5 p-1 rounded-lg hover:bg-violet/20 transition-colors cursor-pointer"
+          title="Refresh balance"
+        >
+          <RefreshCw className={`w-3 h-3 text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
+        </span>
       </button>
       {showMenu && (
         <>

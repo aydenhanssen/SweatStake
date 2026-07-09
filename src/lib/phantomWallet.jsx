@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 
-const SOLANA_RPC = 'https://api.devnet.solana.com';
+const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 // Replace with your real treasury wallet address
 const TREASURY_WALLET = '5ZWjBo9ooooYoeZzB2ko3C7aQ4mrqgFAj1mh3w7hqLxJ';
 
