@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/hooks/useProfile';
-import { WORKOUT_TYPES } from '@/lib/constants';
+import { WORKOUT_TYPES, GOALS } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, RotateCcw, ArrowUp, ArrowDown, Heart, Dumbbell, Footprints, MapPin } from 'lucide-react';
+import { Check, RotateCcw, ArrowUp, ArrowDown, Heart, Dumbbell, Footprints } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import VerificationCamera from '@/components/checkin/VerificationCamera';
-import { generateChallengeCode, burnWatermark } from '@/components/checkin/burnWatermark';
+import { burnWatermark } from '@/components/checkin/burnWatermark';
 
 const workoutIcons = {
   push: ArrowUp,
@@ -25,8 +25,6 @@ export default function CheckInPage() {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [captureTimestamp, setCaptureTimestamp] = useState(null);
-  const [challengeCode, setChallengeCode] = useState(null);
-  const [location, setLocation] = useState(null);
   const [workoutType, setWorkoutType] = useState('');
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -35,6 +33,8 @@ export default function CheckInPage() {
   const [entryLoaded, setEntryLoaded] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const goalName = profile ? (GOALS[profile.primary_goal] || profile.primary_goal || '') : '';
 
   useEffect(() => {
     if (!profile) return;
@@ -51,18 +51,8 @@ export default function CheckInPage() {
     loadEntry();
   }, [profile]);
 
-  useEffect(() => {
-    setChallengeCode(generateChallengeCode());
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => setLocation(null),
-      { timeout: 5000, enableHighAccuracy: true }
-    );
-  }, []);
-
   const handleCameraCapture = async (rawDataUrl) => {
-    const result = await burnWatermark(rawDataUrl, challengeCode, location);
+    const result = await burnWatermark(rawDataUrl, goalName);
     if (!result) {
       toast({ title: 'Error', description: 'Could not process photo. Try again.', variant: 'destructive' });
       return;
@@ -77,18 +67,11 @@ export default function CheckInPage() {
     setPhotoFile(null);
     setPhotoPreview(null);
     setCaptureTimestamp(null);
-    setChallengeCode(generateChallengeCode());
     setStep('camera');
   };
 
   const handleSubmit = async () => {
     if (!workoutType || !photoFile || !activeEntry) return;
-    const captureAge = Date.now() - new Date(captureTimestamp).getTime();
-    if (captureAge > 5 * 60 * 1000) {
-      toast({ title: 'Photo expired', description: 'Please retake your check-in photo.', variant: 'destructive' });
-      handleRetake();
-      return;
-    }
     setSubmitting(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file: photoFile });
@@ -101,8 +84,6 @@ export default function CheckInPage() {
         workout_type: workoutType,
         note,
         timestamp: captureTimestamp,
-        location: location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : '',
-        challenge_code: challengeCode,
       });
       const updated = await base44.entities.ChallengeEntry.update(activeEntry.id, {
         checkins_completed: activeEntry.checkins_completed + 1,
@@ -143,7 +124,6 @@ export default function CheckInPage() {
         {step === 'camera' && (
           activeEntry ? (
             <VerificationCamera
-              challengeCode={challengeCode}
               onCapture={handleCameraCapture}
               onClose={() => navigate('/')}
             />
@@ -179,13 +159,6 @@ export default function CheckInPage() {
                 <RotateCcw className="w-4 h-4 text-white" />
                 <span className="text-white text-xs font-bold">Retake</span>
               </button>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <MapPin className="w-3.5 h-3.5" />
-              <span>{location ? 'Location captured' : 'Location unavailable'}</span>
-              <span className="mx-1">·</span>
-              <span className="font-mono">CODE: {challengeCode}</span>
             </div>
 
             <div>

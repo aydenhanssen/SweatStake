@@ -1,8 +1,4 @@
-export function generateChallengeCode() {
-  return Math.floor(1000 + Math.random() * 9000).toString();
-}
-
-export function burnWatermark(dataUrl, challengeCode, location) {
+export function burnWatermark(dataUrl, goalName) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
@@ -13,14 +9,13 @@ export function burnWatermark(dataUrl, challengeCode, location) {
       ctx.drawImage(img, 0, 0);
 
       const now = new Date();
+      const dateStr = now.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      const timeStr = now.toLocaleTimeString();
       const lines = [
         'SweatStake Proof',
-        `${now.toLocaleDateString()}  ·  ${now.toLocaleTimeString()}`,
-        `CODE: ${challengeCode}`,
+        `${dateStr}  ·  ${timeStr}`,
       ];
-      if (location) {
-        lines.push(`LOC: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`);
-      }
+      if (goalName) lines.push(`Goal: ${goalName}`);
 
       const fontSize = Math.max(14, Math.round(img.width * 0.035));
       ctx.font = `bold ${fontSize}px ui-monospace, monospace`;
