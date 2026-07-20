@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Trophy, Wallet } from "lucide-react";
+import { ArrowLeft, Trophy, Wallet, RefreshCw, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { base44 } from "@/api/base44Client";
 import { usePhantomWallet } from "@/lib/phantomWallet";
@@ -23,7 +23,7 @@ export default function CreateChallenge() {
   const [stakeAmount, setStakeAmount] = useState(0.5);
   const [submitting, setSubmitting] = useState(false);
 
-  const balance = wallet.balance ?? 0;
+  const balance = wallet.balance;
   const estimatedPot = (stakeAmount || 0) * 10;
 
   const handleCreateAndStake = async (e) => {
@@ -44,8 +44,13 @@ export default function CreateChallenge() {
       return;
     }
 
+    if (balance === null) {
+      toast.error("Still loading your SOL balance. Please wait or refresh.");
+      return;
+    }
+
     if (stakeAmount > balance) {
-      toast.error(`Insufficient balance. You have ${balance} SOL`);
+      toast.error(`Insufficient balance. You have ${balance.toFixed(4)} SOL`);
       return;
     }
 
@@ -108,20 +113,43 @@ export default function CreateChallenge() {
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <Wallet className="w-5 h-5 text-primary" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Wallet Balance</p>
-              <p className="text-lg font-bold text-gradient-gold">{balance.toFixed(4)} SOL</p>
+              {wallet.balanceError ? (
+                <p className="text-sm font-bold text-destructive">Failed to load</p>
+              ) : wallet.balanceLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Fetching...</p>
+                </div>
+              ) : balance !== null ? (
+                <p className="text-lg font-bold text-gradient-gold">{balance.toFixed(4)} SOL</p>
+              ) : (
+                <p className="text-sm text-muted-foreground">--</p>
+              )}
             </div>
-            {!wallet.connected && (
+            {!wallet.connected ? (
               <Button
                 size="sm"
                 onClick={wallet.connect}
-                className="ml-auto font-bold rounded-xl"
+                className="font-bold rounded-xl"
               >
                 Connect
               </Button>
+            ) : (wallet.balanceError || wallet.balanceLoading) && (
+              <button
+                onClick={() => wallet.refreshBalance()}
+                disabled={wallet.balanceLoading}
+                className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all disabled:opacity-50"
+                title="Refresh balance"
+              >
+                <RefreshCw className={`w-4 h-4 ${wallet.balanceLoading ? "animate-spin" : ""}`} />
+              </button>
             )}
           </div>
+          {wallet.balanceError && (
+            <p className="text-xs text-destructive/80 -mt-3 mb-4">{wallet.balanceError}</p>
+          )}
 
           <form onSubmit={handleCreateAndStake} className="space-y-5">
             {/* Title */}
