@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Trophy, Wallet } from "lucide-react";
+import { ArrowLeft, Trophy, Wallet, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
 import { base44 } from "@/api/base44Client";
 import { usePhantomWallet } from "@/lib/phantomWallet";
@@ -110,15 +110,34 @@ export default function CreateChallenge() {
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Wallet Balance</p>
-              <p className="text-lg font-bold text-gradient-gold">{balance.toFixed(4)} SOL</p>
+              {wallet.balanceLoading ? (
+                <p className="text-lg font-bold text-muted-foreground">Loading...</p>
+              ) : wallet.balanceError ? (
+                <p className="text-sm font-bold text-destructive">Fetch failed</p>
+              ) : (
+                <p className="text-lg font-bold text-gradient-gold">{balance.toFixed(4)} SOL</p>
+              )}
             </div>
+            {wallet.connected && (wallet.balanceError || wallet.balanceLoading) && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={wallet.refreshBalance}
+                disabled={wallet.balanceLoading}
+                className="ml-auto font-bold rounded-xl"
+              >
+                <RefreshCw className={`w-4 h-4 ${wallet.balanceLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            )}
             {!wallet.connected && (
               <Button
                 size="sm"
                 onClick={wallet.connect}
+                disabled={wallet.connecting}
                 className="ml-auto font-bold rounded-xl"
               >
-                Connect
+                {wallet.connecting ? 'Connecting...' : 'Connect'}
               </Button>
             )}
           </div>

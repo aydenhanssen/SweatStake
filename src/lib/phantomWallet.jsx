@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 
-const SOLANA_RPC = import.meta.env.VITE_HELIUS_RPC_URL || 'https://rpc.ankr.com/solana';
-const SOLANA_RPC_FALLBACK = 'https://rpc.ankr.com/solana';
-// Replace with your real treasury wallet address
-const TREASURY_WALLET = '5ZWjBo9ooooYoeZzB2ko3C7aQ4mrqgFAj1mh3w7hqLxJ';
+const RPC_ENDPOINTS = [
+  import.meta.env.VITE_HELIUS_RPC_URL,
+  'https://api.devnet.solana.com',
+  'https://api.mainnet-beta.solana.com',
+].filter(Boolean);
+
+const TREASURY_WALLET = '8rPBSaGka2NiHpDdgufVoVvnPzEcnVwN49i5yf3pnk5h';
 
 const PhantomWalletContext = createContext(null);
 
@@ -13,9 +16,8 @@ export function PhantomWalletProvider({ children }) {
   const [address, setAddress] = useState(null);
   const [balance, setBalance] = useState(null);
   const [balanceError, setBalanceError] = useState(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
   const [connecting, setConnecting] = useState(false);
-  const [connection] = useState(() => new Connection(SOLANA_RPC, 'confirmed'));
-  const [fallbackConnection] = useState(() => new Connection(SOLANA_RPC_FALLBACK, 'confirmed'));
 
   const shortenAddress = (addr) => {
     if (!addr) return '';
@@ -24,22 +26,26 @@ export function PhantomWalletProvider({ children }) {
 
   const fetchBalanceWithRetry = useCallback(async (pk, attempts = 3) => {
     for (let i = 0; i < attempts; i++) {
-      for (const conn of [connection, fallbackConnection]) {
+      for (const rpcUrl of RPC_ENDPOINTS) {
         try {
+          const conn = new Connection(rpcUrl, 'confirmed');
           const bal = await conn.getBalance(pk);
           return bal / LAMPORTS_PER_SOL;
         } catch (err) {
-          // try next connection
+          console.warn(`Balance fetch failed on ${rpcUrl} (attempt ${i + 1}/${attempts}):`, err.message);
         }
       }
-      // wait before retrying (2s, 4s)
-      if (i < attempts - 1) await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+      // Exponential backoff: 1s, 2s, 4s
+      if (i < attempts - 1) {
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+      }
     }
     return null;
-  }, [connection, fallbackConnection]);
+  }, []);
 
   const refreshBalance = useCallback(async (pubkey) => {
     if (!pubkey) return;
+    setBalanceLoading(true);
     setBalanceError(null);
     const pk = new PublicKey(pubkey);
     const result = await fetchBalanceWithRetry(pk);
@@ -47,8 +53,10 @@ export function PhantomWalletProvider({ children }) {
       setBalance(result);
     } else {
       setBalance(null);
-      setBalanceError('Unable to fetch SOL balance after multiple retries. Try refreshing manually.');
+      setBalanceError('Unable to fetch SOL balance. Check your network and try again.');
+      console.error('Balance fetch failed after all retries for address:', pubkey);
     }
+    setBalanceLoading(false);
   }, [fetchBalanceWithRetry]);
 
   useEffect(() => {
@@ -128,18 +136,20 @@ export function PhantomWalletProvider({ children }) {
     const toPubkey = new PublicKey(destination);
     const lamports = Math.round(solAmount * LAMPORTS_PER_SOL);
 
+    const conn = new Connection(RPC_ENDPOINTS[0], 'confirmed');
+
     const transaction = new Transaction().add(
       SystemProgram.transfer({ fromPubkey, toPubkey, lamports })
     );
     transaction.feePayer = fromPubkey;
-    const { blockhash } = await connection.getLatestBlockhash();
+    const { blockhash } = await conn.getLatestBlockhash();
     transaction.recentBlockhash = blockhash;
 
     const { signature } = await provider.signAndSendTransaction(transaction);
-    await connection.confirmTransaction(signature, 'confirmed');
+    await conn.confirmTransaction(signature, 'confirmed');
     await refreshBalance(fromPubkey.toString());
     return signature;
-  }, [connection, refreshBalance]);
+  }, [refreshBalance]);
 
   const value = {
     connected,
@@ -147,6 +157,7 @@ export function PhantomWalletProvider({ children }) {
     shortenedAddress: shortenAddress(address),
     balance,
     balanceError,
+    balanceLoading,
     connecting,
     connect,
     disconnect,
