@@ -63,7 +63,7 @@ export default function PhantomWalletButton({ compact = false }) {
         className="relative flex items-center justify-center w-9 h-9 rounded-xl glass-card transition-all hover:border-violet/40 hover:scale-105"
         title={shortenedAddress}
       >
-        <PhantomLogo size={32} showStatus connected />
+        <PhantomLogo size={30} showStatus connected />
       </button>
       {showMenu && (
         <>
