@@ -7,8 +7,7 @@ import { useSolanaStake } from "@/hooks/useSolanaStake";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, Zap } from "lucide-react";
-import PhantomWalletBadge from "@/components/wallet/PhantomWalletBadge";
+import { ArrowLeft, Loader2, Wallet, Zap } from "lucide-react";
 
 export default function CreateChallenge() {
   const navigate = useNavigate();
@@ -19,6 +18,15 @@ export default function CreateChallenge() {
   const [description, setDescription] = useState("");
   const [stakeAmount, setStakeAmount] = useState(0.1);
   const [submitting, setSubmitting] = useState(false);
+
+  const balance = wallet.balance;
+  const balanceLabel = wallet.balanceLoading
+    ? "Loading…"
+    : balance !== null
+    ? `${balance.toFixed(4)} SOL`
+    : wallet.connected
+    ? "—"
+    : "Not connected";
 
   const handleCreate = async () => {
     console.log("Starting creation", { title, description, stakeAmount, connected: wallet.connected });
@@ -111,8 +119,19 @@ export default function CreateChallenge() {
       <p className="text-sm text-muted-foreground mb-6">Stake SOL, commit, and compete for the pot.</p>
 
       {/* Wallet balance */}
-      <div className="mb-6">
-        <PhantomWalletBadge />
+      <div className="flex items-center gap-3 glass-card rounded-2xl p-4 mb-6">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <Wallet className="w-5 h-5 text-primary" />
+        </div>
+        <div className="flex-1">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Wallet Balance</p>
+          <p className="text-lg font-bold text-gradient-gold">{balanceLabel}</p>
+        </div>
+        {!wallet.connected && (
+          <Button size="sm" onClick={() => wallet.connect()} disabled={wallet.connecting} className="rounded-xl">
+            {wallet.connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
+          </Button>
+        )}
       </div>
 
       {/* Title */}
