@@ -71,34 +71,29 @@ export default function Home() {
   return (
     <div className="max-w-lg mx-auto px-6 pt-8 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-10 gap-3">
-        <div className="flex items-center gap-2.5 flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-yellow-500 flex items-center justify-center shadow-lg shadow-primary/30">
-            <Flame className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
-          </div>
-          <h1 className="text-lg sm:text-xl font-black font-heading tracking-[0.15em] text-gradient-gold">SWEATSTAKE</h1>
-        </div>
+      <div className="flex items-center justify-between mb-12 gap-3">
+        <h1 className="text-lg sm:text-xl font-black font-heading tracking-[0.15em] text-gradient-gold flex-shrink-0">SWEATSTAKE</h1>
         <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
           <PhantomWalletButton compact={false} />
           {isAdmin(user?.email) && (
-            <Link to="/admin" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all hover:scale-105">
+            <Link to="/admin" className="w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
               <Shield className="w-4 h-4 text-primary" />
             </Link>
           )}
-          <Link to="/notifications" className="relative w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all hover:scale-105">
+          <Link to="/notifications" className="relative w-9 h-9 flex items-center justify-center rounded-xl glass-card hover:border-primary/30 transition-all">
             <Bell className="w-4 h-4 text-muted-foreground" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white ring-2 ring-background animate-pulse">
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full text-[9px] font-bold flex items-center justify-center text-white ring-2 ring-background">
                 {unreadCount}
               </span>
             )}
           </Link>
           <Link to="/profile">
-            <div className="w-9 h-9 rounded-full bg-secondary overflow-hidden border border-border hover:border-primary/40 transition-all hover:scale-105 ring-1 ring-primary/10">
+            <div className="w-9 h-9 rounded-full bg-secondary overflow-hidden border border-border hover:border-primary/40 transition-all">
               {profile.photo_url ? (
                 <img src={profile.photo_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm font-bold bg-gradient-to-br from-secondary to-secondary/50">
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm font-bold">
                   {profile.username?.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -111,33 +106,20 @@ export default function Home() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-[2rem] p-8 mb-6 glass-balance premium-border-glow"
+        className="relative overflow-hidden rounded-[2rem] p-8 mb-6 premium-border-glow glow-primary"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-violet/10 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-violet/8 via-transparent to-primary/15 animate-gradient-shift" style={{ backgroundSize: '200% 200%' }} />
-        <div className="absolute top-0 right-0 w-44 h-44 bg-primary/15 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-0 left-0 w-36 h-36 bg-violet/15 rounded-full blur-3xl" />
-        <div className="relative flex items-start justify-between">
-          <div>
-            <p className="text-xs text-primary/90 font-bold uppercase tracking-[0.2em] font-heading">Your SOL Balance</p>
-            <p className="text-6xl font-black text-gradient-gold mt-2 font-heading drop-shadow-[0_0_24px_hsl(43_96%_56%_/_0.4)]">
-              {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
-            </p>
-            <p className="text-sm text-muted-foreground mt-2 font-medium">
-              {connected ? 'SOL' : 'Connect Phantom to stake SOL'}
-            </p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-violet/20 flex items-center justify-center backdrop-blur-md border border-primary/20">
-            <svg viewBox="0 0 24 24" className="w-6 h-6">
-              <defs>
-                <linearGradient id="sol-grad-home" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="hsl(43 96% 62%)" />
-                  <stop offset="100%" stopColor="hsl(258 90% 70%)" />
-                </linearGradient>
-              </defs>
-              <path fill="url(#sol-grad-home)" d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.3L19.5 8 12 11.7 4.5 8 12 4.3z"/>
-            </svg>
-          </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-violet/8 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-violet/5 via-transparent to-primary/10 animate-gradient-shift" style={{ backgroundSize: '200% 200%' }} />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet/10 rounded-full blur-3xl" />
+        <div className="relative">
+          <p className="text-xs text-primary/80 font-bold uppercase tracking-[0.2em] font-heading">Your SOL Balance</p>
+          <p className="text-5xl font-black text-gradient-gold mt-2 font-heading drop-shadow-[0_0_20px_hsl(43_96%_56%_/_0.3)]">
+            {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 font-medium">
+            {connected ? 'SOL' : 'Connect Phantom to stake SOL'}
+          </p>
         </div>
       </motion.div>
 
