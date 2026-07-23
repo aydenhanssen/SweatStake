@@ -4,7 +4,8 @@ import toast from "react-hot-toast";
 import { base44 } from "@/api/base44Client";
 
 const TREASURY_WALLET = "8rPBSaGka2NiHpDdgufVoVvnPzEcnVwN49i5yf3pnk5h";
-const RPC_URL = import.meta.env.VITE_HELIUS_RPC_URL || "https://api.devnet.solana.com";
+// Use mainnet by default so confirmTransaction matches the network Phantom broadcasts on
+const RPC_URL = import.meta.env.VITE_HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
 
 export const useSolanaStake = () => {
   const stakeOnChallenge = async ({ challengeId, amountInSOL }) => {
@@ -41,13 +42,19 @@ export const useSolanaStake = () => {
 
       console.log("Staking started", { from: fromPubkey.toString(), to: TREASURY_WALLET, lamports });
 
+      // Phantom opens here — user confirms the real SOL transfer
       const { signature } = await provider.signAndSendTransaction(transaction);
+      console.log("Transaction signed & broadcast. Signature:", signature);
 
-      await connection.confirmTransaction(signature, "confirmed");
+      // Confirm, but never hang forever — 30s cap, then proceed optimistically
+      await Promise.race([
+        connection.confirmTransaction(signature, "confirmed"),
+        new Promise((resolve) => setTimeout(() => resolve("timeout"), 30000)),
+      ]);
 
       console.log("✅ Real SOL staked! Signature:", signature);
 
-      // Update the challenge pot in Base44
+      // Update the challenge pot in Base44 (best-effort)
       try {
         await base44.entities.Challenge.update(challengeId, {
           sol_total_pot: amountInSOL,

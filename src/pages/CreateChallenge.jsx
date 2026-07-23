@@ -29,7 +29,7 @@ export default function CreateChallenge() {
     : "Not connected";
 
   const handleCreate = async () => {
-    console.log("Button clicked", { title, description, stakeAmount, connected: wallet.connected });
+    console.log("Starting creation", { title, description, stakeAmount, connected: wallet.connected });
 
     if (!title.trim()) {
       toast.error("Enter a challenge title");
@@ -40,10 +40,9 @@ export default function CreateChallenge() {
       return;
     }
 
-    // 1. Check wallet
+    // Ensure wallet is connected
     if (!wallet.connected) {
       console.log("Wallet not connected, connecting…");
-      toast("Connecting Phantom…");
       try {
         await wallet.connect();
       } catch (err) {
@@ -57,7 +56,7 @@ export default function CreateChallenge() {
     const loadingId = toast.loading("Creating challenge…");
 
     try {
-      // 2. Create the Challenge entity in Base44
+      // 1. Create the Challenge entity in Base44 first (need its id for staking)
       console.log("Creating in Base44");
       const today = new Date();
       const weekEnd = new Date(today);
@@ -81,9 +80,9 @@ export default function CreateChallenge() {
         creator: wallet.address || "",
       });
 
-      console.log("✅ Challenge created in Base44:", challenge.id);
+      console.log("Challenge created with ID:", challenge.id);
 
-      // 3. Immediately call stakeOnChallenge — opens Phantom for real SOL transfer
+      // 2. Stake — opens Phantom for real SOL transfer to treasury
       console.log("Calling stakeOnChallenge", { challengeId: challenge.id, amountInSOL: Number(stakeAmount) });
       toast.loading("Opening Phantom to confirm stake…", { id: loadingId });
 
@@ -92,10 +91,11 @@ export default function CreateChallenge() {
         amountInSOL: Number(stakeAmount),
       });
 
-      console.log("✅ Stake result:", stakeResult);
-      toast.success("Challenge created & SOL staked!", { id: loadingId });
+      console.log("Staking completed", stakeResult);
 
-      // 5. Navigate to challenge detail
+      // 3. Success + navigate
+      toast.success("Challenge created & SOL staked!", { id: loadingId });
+      console.log("Navigating to detail page", `/challenge/${challenge.id}`);
       navigate(`/challenge/${challenge.id}`);
     } catch (err) {
       console.error("❌ Create/stake failed:", err);
@@ -170,7 +170,7 @@ export default function CreateChallenge() {
         />
       </div>
 
-      {/* Main button — large & obvious */}
+      {/* Main button */}
       <Button
         onClick={handleCreate}
         disabled={submitting}
