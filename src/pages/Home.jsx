@@ -10,7 +10,6 @@ import { isAdmin } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import PhantomWalletButton from '@/components/wallet/PhantomWalletButton';
-import PhantomLogo from '@/components/wallet/PhantomLogo';
 import { usePhantomWallet } from '@/lib/phantomWallet';
 
 export default function Home() {
@@ -114,10 +113,7 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet/10 rounded-full blur-3xl" />
         <div className="relative">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-primary/80 font-bold uppercase tracking-[0.2em] font-heading">Your SOL Balance</p>
-            <PhantomLogo size={30} showStatus connected={connected} />
-          </div>
+          <p className="text-xs text-primary/80 font-bold uppercase tracking-[0.2em] font-heading">Your SOL Balance</p>
           <p className="text-5xl font-black text-gradient-gold mt-2 font-heading drop-shadow-[0_0_20px_hsl(43_96%_56%_/_0.3)]">
             {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
           </p>
