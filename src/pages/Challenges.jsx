@@ -105,14 +105,14 @@ export default function Challenges() {
       </div>
 
       {/* Tier filter */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 no-scrollbar">
+      <div className="grid grid-cols-5 gap-1.5 mb-6">
         {tiers.map((t) => (
           <button
             key={t}
             onClick={() => setTierFilter(t)}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide whitespace-nowrap transition-all ${
+            className={`px-1 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wide truncate transition-all ${
               tierFilter === t
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30'
                 : 'glass-card text-muted-foreground hover:text-foreground'
             }`}
           >
