@@ -7,7 +7,8 @@ import { useSolanaStake } from "@/hooks/useSolanaStake";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, Wallet, Zap } from "lucide-react";
+import { ArrowLeft, Loader2, Zap } from "lucide-react";
+import PhantomLogo from "@/components/wallet/PhantomLogo";
 
 export default function CreateChallenge() {
   const navigate = useNavigate();
@@ -120,8 +121,8 @@ export default function CreateChallenge() {
 
       {/* Wallet balance */}
       <div className="flex items-center gap-3 glass-card rounded-2xl p-4 mb-6">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Wallet className="w-5 h-5 text-primary" />
+        <div className="flex-shrink-0">
+          <PhantomLogo size={32} showStatus connected={wallet.connected} />
         </div>
         <div className="flex-1">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Wallet Balance</p>
