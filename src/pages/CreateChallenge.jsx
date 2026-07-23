@@ -119,16 +119,18 @@ export default function CreateChallenge() {
       <p className="text-sm text-muted-foreground mb-6">Stake SOL, commit, and compete for the pot.</p>
 
       {/* Wallet balance */}
-      <div className="flex items-center gap-3 glass-card rounded-2xl p-4 mb-6">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Wallet className="w-5 h-5 text-primary" />
+      <div className="relative overflow-hidden flex items-center gap-4 glass-balance premium-border-glow rounded-[1.75rem] p-5 mb-6">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-28 h-28 bg-violet/15 rounded-full blur-3xl" />
+        <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/25 to-violet/25 flex items-center justify-center border border-primary/20">
+          <Wallet className="w-6 h-6 text-primary" />
         </div>
-        <div className="flex-1">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Wallet Balance</p>
-          <p className="text-lg font-bold text-gradient-gold">{balanceLabel}</p>
+        <div className="relative flex-1">
+          <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Wallet Balance</p>
+          <p className="text-2xl font-black text-gradient-gold font-heading drop-shadow-[0_0_16px_hsl(43_96%_56%_/_0.3)]">{balanceLabel}</p>
         </div>
         {!wallet.connected && (
-          <Button size="sm" onClick={() => wallet.connect()} disabled={wallet.connecting} className="rounded-xl">
+          <Button size="sm" onClick={() => wallet.connect()} disabled={wallet.connecting} className="rounded-xl glow-violet">
             {wallet.connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
           </Button>
         )}
@@ -175,7 +177,7 @@ export default function CreateChallenge() {
         onClick={handleCreate}
         disabled={submitting}
         size="lg"
-        className="w-full h-16 text-lg font-bold rounded-3xl glow-primary-strong"
+        className="w-full h-16 text-lg font-black font-heading rounded-3xl bg-gradient-to-r from-primary via-yellow-400 to-yellow-500 hover:brightness-110 text-primary-foreground btn-glow-gold ring-2 ring-primary/30 ring-offset-2 ring-offset-background animate-glow-pulse transition-all hover:scale-[1.02]"
       >
         {submitting ? (
           <>

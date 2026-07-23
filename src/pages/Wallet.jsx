@@ -65,27 +65,34 @@ export default function Wallet() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/20 rounded-3xl p-6 mb-5"
+        className="relative overflow-hidden glass-balance premium-border-glow rounded-[2rem] p-8 mb-5"
       >
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-primary">
-              <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.3L19.5 8 12 11.7 4.5 8 12 4.3z"/>
-            </svg>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-violet/10 to-transparent" />
+        <div className="absolute top-0 right-0 w-44 h-44 bg-primary/15 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-0 left-0 w-36 h-36 bg-violet/15 rounded-full blur-3xl" />
+        <div className="relative flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-primary">
+                  <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.3L19.5 8 12 11.7 4.5 8 12 4.3z"/>
+                </svg>
+              </div>
+              <p className="text-xs text-primary/80 font-bold uppercase tracking-[0.2em] font-heading">SOL Balance</p>
+            </div>
+            <p className="text-6xl font-black text-gradient-gold drop-shadow-[0_0_24px_hsl(43_96%_56%_/_0.4)]">
+              {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-2 font-medium">
+              {connected ? 'SOL' : 'Connect your Phantom wallet'}
+            </p>
           </div>
-          <p className="text-xs text-primary/70 font-semibold uppercase tracking-widest">SOL Balance</p>
         </div>
-        <p className="text-5xl font-black text-primary">
-          {connected ? (balance?.toFixed(4) || '0.0000') : '—'}
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          {connected ? 'SOL' : 'Connect your Phantom wallet'}
-        </p>
       </motion.div>
 
       {/* Pending & Winnings */}
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-card border border-border rounded-2xl p-4">
+        <div className="neumorphic-card rounded-2xl p-4 border border-border/40">
           <div className="flex items-center gap-1.5 mb-1">
             <Lock className="w-3.5 h-3.5 text-orange-400" />
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Pending</span>
@@ -93,12 +100,12 @@ export default function Wallet() {
           <p className="text-xl font-black text-foreground">{pendingStakes.toFixed(4)}</p>
           <p className="text-xs text-muted-foreground">SOL locked in stakes</p>
         </div>
-        <div className="bg-card border border-border rounded-2xl p-4">
+        <div className="neumorphic-card rounded-2xl p-4 border border-primary/15">
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingUp className="w-3.5 h-3.5 text-primary" />
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Winnings</span>
           </div>
-          <p className="text-xl font-black text-primary">{(profile.total_sol_won || 0).toFixed(4)}</p>
+          <p className="text-xl font-black text-gradient-gold">{(profile.total_sol_won || 0).toFixed(4)}</p>
           <p className="text-xs text-muted-foreground">SOL all-time won</p>
         </div>
       </div>
@@ -116,7 +123,7 @@ export default function Wallet() {
               const meta = TYPE_META[tx.type] || TYPE_META.stake;
               const Icon = meta.icon;
               return (
-                <div key={tx.id} className="bg-card border border-border rounded-2xl p-3.5 flex items-center justify-between">
+                <div key={tx.id} className="neumorphic-card border border-border/40 rounded-2xl p-3.5 flex items-center justify-between transition-all hover:border-primary/20 hover:scale-[1.01]">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-secondary/60 flex items-center justify-center">
                       <Icon className={`w-4 h-4 ${meta.color}`} />
